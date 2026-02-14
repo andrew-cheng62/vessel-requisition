@@ -1,0 +1,121 @@
+Database user pwd: andrewkikott
+----------------------------------------
+Virtual Environment activation
+
+From inside the backend folder:
+
+1) python -m venv venv
+2) venv\Scripts\activate
+
+You should now see something like:
+(venv) C:\...\backend>
+-------------------------------
+--- If not installed then>>>
+--- pip install fastapi uvicorn
+
+--- Checking if installed>>>
+--- pip show fastapi
+--- pip show uvicorn
+------------------------------------
+Starting backend server:
+python -m uvicorn app.main:app --reload
+====================================
+Working with API:
+Create requisition draft:
+{
+  "item_id": 1,
+  "quantity": 10,
+  "unit": "pcs",
+  "supplier_id": 1
+}
+Chahge status to order:
+{
+  "status": "ordered"
+}
+Receive:
+{
+  "quantity": 4
+}
+================================
+Working with database with Alembic
+
+Step 1 — Decide what you want to change:
+
+Example:
++ add is_primary to item_images
++ add index on item_id
++ make uploaded_at non-null
+
+Step 2 — Create Alembic migration
+
+From backend/: (venv)
+
+python -m alembic revision -m "primary image make unique"
+or
+alembic revision -m "alter columns companies2"
+
+### python -m alembic revision --autogenerate -m "add item images" ###
+
+Step 3 — Write the SQLAlchemy operations manually
+
+def upgrade():
+    op.add_column(
+        'item_images',
+        sa.Column('is_primary', sa.Boolean(), server_default='false', nullable=False)
+    )
+
+def downgrade():
+    op.drop_column('item_images', 'is_primary')
+
+Step 4 — Apply
+
+python -m alembic upgrade head
+python -m alembic downgrade head
+
+======================================
+
+Starting the dev server (from vessel-requisition/frontend only!!!)
+npm run dev
+
+You should see:
+VITE v5.x.x ready in xxx ms
+➜ Local: http://localhost:5173/
+
+Shortcuts whithin dev server:
+  press r + enter to restart the server
+  press u + enter to show server url
+  press o + enter to open in browser
+  press c + enter to clear console
+  press q + enter to quit
+
+Alembic migrations:
+op.create_table(
+        "requisitions",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("supplier_id", sa.Integer(), sa.ForeignKey("companies.id"), nullable=False),
+        sa.Column("created_by", sa.UUID(), sa.ForeignKey("users.id"), nullable=False),
+        sa.Column("notes", sa.Text()),
+        sa.Column("status", sa.String(), server_default="draft"),
+        sa.Column("created_at", sa.DateTime(), server_default=sa.func.now()),
+    )
+==========
+update requisition_items
+def upgrade():
+    op.alter_column(
+    "Companies",
+    sa.Column("contact_person", "website", nullable=True),
+)
+    op.alter_column(
+    "Companies",
+    sa.Column("role", "logo_path", nullable=True),
+)
+ 
+def downgrade():
+    op.alter_column(
+    "Companies",
+    sa.Column("website", "contact_person", nullable=True),
+)
+    op.alter_column(
+    "Companies",
+    sa.Column("logo_path", "role", nullable=True),
+)
