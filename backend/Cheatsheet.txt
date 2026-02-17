@@ -75,7 +75,7 @@ python -m alembic downgrade head
 ======================================
 
 Starting the dev server (from vessel-requisition/frontend only!!!)
-npm run dev
+
 
 You should see:
 VITE v5.x.x ready in xxx ms
@@ -119,3 +119,7 @@ def downgrade():
     "Companies",
     sa.Column("logo_path", "role", nullable=True),
 )
+
+<div className="space-y-6"> ---- for spacing between fields/divs
+<div className="flex gap-4">
+<div className="grid grid-cols-2 gap-4">

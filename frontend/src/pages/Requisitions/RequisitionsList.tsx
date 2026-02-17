@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import api, { fetchCompanies } from "../../api/api";
 import type { Requisition, Supplier } from "../../types";
-import FilterBar from "../../components/FilterBar";
+import FilterBar from "../../components/ui/FilterBar";
 import Table from "../../components/ui/Table";
 import Button from "../../components/ui/Button";
 import PageContainer from "../../components/layout/PageContainer";
+import StatusBadge from "../../components/status/StatusBadge";
+
+import toast from "react-hot-toast";
 
 const STATUSES = [
   "draft",
@@ -20,6 +23,7 @@ export default function RequisitionsList() {
   const [data, setData] = useState<Requisition[]>([]);
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [loading, setLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const filters = {
@@ -38,7 +42,8 @@ export default function RequisitionsList() {
 
     const params: any = {};
     if (filters.status) params.status = filters.status;
-    if (filters.supplier_id) params.supplier_id = Number(filters.supplier_id);
+    if (filters.supplier_id)
+      params.supplier_id = Number(filters.supplier_id);
 
     api
       .get("/requisitions", { params })
@@ -59,11 +64,33 @@ export default function RequisitionsList() {
     setSearchParams({});
   };
 
+  // DELETE HANDLER
+  const handleDelete = async (id: number) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this requisition?"
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(id);
+
+      await api.delete(`/requisitions/${id}`);
+
+      // Remove deleted row from UI
+      setData(prev => prev.filter(r => r.id !== id));
+      toast.success("Requisition deleted");
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || "Delete failed");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const filterConfig = [
     {
       key: "status",
       type: "select",
-      label: "All statuses",
+      label: "Status",
       options: STATUSES.map(s => ({
         value: s,
         label: s.replace("_", " ").toUpperCase(),
@@ -72,7 +99,7 @@ export default function RequisitionsList() {
     {
       key: "supplier_id",
       type: "select",
-      label: "All suppliers",
+      label: "Supplier",
       options: suppliers.map(s => ({
         value: String(s.id),
         label: s.name,
@@ -81,8 +108,7 @@ export default function RequisitionsList() {
   ];
 
   return (
-  <PageContainer title="Requisitions">
-
+    <PageContainer title="Requisitions">
       <FilterBar
         filters={filters}
         config={filterConfig}
@@ -106,23 +132,44 @@ export default function RequisitionsList() {
             </tr>
           </thead>
           <tbody>
-            {data.map(r => (
-              <tr key={r.id}>
-                <td>{r.id}</td>
-                <td>{r.status}</td>
-                <td>{r.supplier?.name ?? "-"}</td>
-                <td>{r.items.length}</td>
-                <td>{new Date(r.created_at).toLocaleDateString()}</td>
-                <td>
-                  <Link to={`/requisitions/${r.id}`}>
-                    <Button variant="ghost">View</Button>
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {data.map(r => {
+              const canDelete =
+                r.status === "draft" || r.status === "cancelled";
+
+              return (
+                <tr key={r.id}>
+                  <td>{r.id}</td>
+                  <td className="px-4 py-3">
+                    <StatusBadge status={r.status} />
+                  </td>
+                  <td>{r.supplier?.name ?? "-"}</td>
+                  <td>{r.items.length}</td>
+                  <td>
+                    {new Date(r.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="flex gap-2">
+                    <Link to={`/requisitions/${r.id}`}>
+                      <Button variant="ghost">View</Button>
+                    </Link>
+
+                    {canDelete && (
+                      <Button
+                        variant="delete"
+                        onClick={() => handleDelete(r.id)}
+                        disabled={deletingId === r.id}
+                      >
+                        {deletingId === r.id
+                          ? "Deleting..."
+                          : "✕"}
+                      </Button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </Table>
       )}
-  </PageContainer>
+    </PageContainer>
   );
 }

@@ -25,7 +25,7 @@ class Item(Base):
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="RESTRICT"), nullable=False)
 
     category = relationship("Category")
-    manufacturer = relationship("Company", foreign_keys=[manufacturer_id], back_populates="manufactured_items")
+    manufacturer = relationship("Company", foreign_keys=[manufacturer_id])
     supplier = relationship("Company", foreign_keys=[supplier_id])
     requisition_items = relationship("RequisitionItem", back_populates="item", cascade="all, delete-orphan")
 

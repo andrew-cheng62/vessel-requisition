@@ -3,11 +3,13 @@ import api from "../../api/api";
 import type { Requisition, RequisitionItem } from "../../types";
 import toast from "react-hot-toast";
 import ReceiveRow from "./ReceiveRow";
+import Button from "../../components/ui/Button";
+import styles from "../../styles/Modal.module.css";
 
 type Props = {
   requisition: Requisition;
   onClose: () => void;
-  onUpdated: () => void;
+  onUpdated: (req: Requisition) => void;
 };
 
 export default function ReceiveModal({
@@ -28,29 +30,29 @@ export default function ReceiveModal({
 
     try {
       const res = await api.post(
-       `/requisitions/${requisition.id}/items/${item.id}/receive`,
-        { quantity: qty}
-     );
+        `/requisitions/${requisition.id}/items/${item.id}/receive`,
+        { quantity: qty }
+      );
 
-      onUpdated(res.data); // backend is source of truth
+      onUpdated(res.data);
       toast.success("Items received");
       onClose();
-
-      
     } catch (err: any) {
-      toast.error(err.responce?.data?.detail || "Failed to receive items");
+      toast.error(err.response?.data?.detail || "Failed to receive items");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="modal-backdrop">
-      <div className="modal">
-        <h3>Receive items</h3>
+    <div className={styles.backdrop}>
+      <div className={styles.modal}>
+        <div className={styles.title}>Receive Items</div>
 
         {receivableItems.length === 0 && (
-          <p>All items already received.</p>
+          <div className={styles.metaText}>
+            All items already received.
+          </div>
         )}
 
         {receivableItems.map(item => {
@@ -67,10 +69,15 @@ export default function ReceiveModal({
           );
         })}
 
-        <div style={{ marginTop: 16 }}>
-          <button onClick={onClose} disabled={loading}>
+        <div className={styles.actions}>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+          >
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>

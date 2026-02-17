@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from app.database import SessionLocal
 from app.auth import get_current_user
 from app.models.item import Item
+from app.models.user import User
 from app.models.company import Company
 from app.models.category import Category
 from app.schemas.item import ItemOut, ItemUpdate, ItemCreate
@@ -35,10 +36,14 @@ def validate_category(db: Session, category_id: int | None):
 def create_item(
     item: ItemCreate,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     validate_category(db, item.category_id)
 
-    db_item = Item(**item.model_dump())
+    db_item = Item(
+           **item.model_dump(),
+           created_by = current_user.id
+    )
     db.add(db_item)
     db.commit()
     db.refresh(db_item)

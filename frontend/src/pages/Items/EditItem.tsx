@@ -4,7 +4,12 @@ import api, { fetchCompanies, fetchCategories } from "../../api/api";
 import type { Item, Company, Category } from "../../types";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
-import { FormLayout } from "../../components/ui/FormLayout";
+import Select from "../../components/ui/Select";
+import PageContainer from "../../components/layout/PageContainer";
+import { ImageUpload } from "../../components/ui/ImageUpload";
+import { FormLayout, FormField } from "../../components/layout/FormLayout";
+import toast from "react-hot-toast";
+
 
 export default function EditItem() {
   const { id } = useParams<{ id: string }>();
@@ -23,14 +28,15 @@ export default function EditItem() {
   const [manufacturers, setManufacturers] = useState<Company[]>([]);
   const [suppliers, setSuppliers] = useState<Company[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [imageDeleted, setImageDeleted] = useState(false);
 
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /* LOAD COMPANIES AND CATEGORIES */
   useEffect(() => {
-    fetchCompanies({ is_manufacturer: true }).then(setManufacturers);
-    fetchCompanies({ is_supplier: true }).then(setSuppliers);
+    fetchCompanies({ role: "manufacturer" }).then(setManufacturers);
+    fetchCompanies({ role: "supplier" }).then(setSuppliers);
     fetchCategories().then(setCategories);
   }, []);
 
@@ -72,10 +78,10 @@ export default function EditItem() {
         await api.post(`/items/${id}/image`, formData);
       }
 
-      setMessage("Item saved successfully");
-      navigate(`/items/${id}`);
+      toast.success("Item saved successfully");
+      setTimeout(() => navigate(`/items/${id}`), 800);
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to save item");
+      toast.error(err.response?.data?.detail || "Failed to save item");
     }
   };
 
@@ -84,82 +90,126 @@ export default function EditItem() {
     if (!confirm("Delete item image?")) return;
 
     await api.delete(`/items/${id}/image`);
+
     setItem(prev => prev ? { ...prev, image_path: null } : prev);
-  };
+    setImageDeleted(true);
+    toast.success("Image deleted successfully");
+};
+
 
   if (!item) return <p>Loading...</p>;
 
   return (
-    <FormLayout onSubmit={handleSave}>
-      <div className="flex justify-between items-center mb-6"> 
-        <h1 className="text-2x1 font-semibold">Edit Item</h1>
-      </div>
+    <PageContainer title="Edit Item">
+
+      <FormLayout onSubmit={handleSave}>
 
       {message && <p style={{ color: "green" }}>{message}</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <Input value={name} onChange={e => setName(e.target.value)} required />
-      <Input value={description} onChange={e => setDescription(e.target.value)} />
-      <Input value={catalogueNr} onChange={e => setCatalogueNr(e.target.value)} />
-      <Input value={unit} onChange={e => setUnit(e.target.value)} required />
-      <select
-        value={categoryId}
-        onChange={e => setCategoryId(e.target.value ? Number(e.target.value) : "")}
-      >
-        <option value="">Select category</option>
-        {categories.map(c => (
-          <option key={c.id} value={c.id}>
-            {c.name}
-          </option>
-        ))}
-      </select>
+        <FormField label="Edit Category">
+          <Select
+            value={categoryId}
+            onChange={e => setCategoryId(e.target.value ? Number(e.target.value) : "")}
+          >
+            <option value="">Select category</option>
+            {categories.map(c => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        </FormField>
 
-      <select
-        value={manufacturerId}
-        onChange={e => setManufacturerId(e.target.value ? Number(e.target.value) : "")}
-      >
-        <option value="">Select manufacturer</option>
-        {manufacturers.map(m => (
-          <option key={m.id} value={m.id}>{m.name}
-        </option>
-        ))}
-      </select>
+        <FormField label="Edit Name">
+          <Input value={name} onChange={e => setName(e.target.value)} required />
+        </FormField>
 
-      {/* Supplier */}
-      <select
-        value={supplierId}
-        onChange={e =>
-          setSupplierId(e.target.value ? Number(e.target.value) : "")
-        }
-      >
-        <option value="">Select supplier</option>
-        {suppliers.map(s => (
-          <option key={s.id} value={s.id}>
-            {s.name}
-        </option>
-        ))}
-      </select>
+        <FormField label="Edit Description">
+          <Input value={description} onChange={e => setDescription(e.target.value)} />
+        </FormField>
+
+        <FormField label="Edit Catalog Nr">
+          <Input value={catalogueNr} onChange={e => setCatalogueNr(e.target.value)} />
+        </FormField>
+
+        <FormField label="Edit Unit">
+          <Input value={unit} onChange={e => setUnit(e.target.value)} required />
+        </FormField>
+
+        <div className="grid grid-cols-2 gap-4">
+        <FormField label="Edit Manufacturer">
+          <Select
+            value={manufacturerId}
+            onChange={e => setManufacturerId(e.target.value ? Number(e.target.value) : "")}
+          >
+            <option value="">Select manufacturer</option>
+            {manufacturers.map(m => (
+              <option key={m.id} value={m.id}>{m.name}
+            </option>
+            ))}
+          </Select>
+        </FormField>
+
+        <FormField label="Edit Supplier">
+          <Select
+            value={supplierId}
+            onChange={e =>
+              setSupplierId(e.target.value ? Number(e.target.value) : "")
+            }
+          >
+            <option value="">Select supplier</option>
+            {suppliers.map(s => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+            </option>
+            ))}
+          </Select>
+        </FormField>
+        </div>
 
       {/* IMAGE PREVIEW */}
-      {item.image_path && (
+      {item.image_path && !imageDeleted && (
         <div>
           <img
             src={`http://localhost:8000/${item.image_path}`}
-            style={{ width: 150, display: "block", marginBottom: 8 }}
+            className="w-40 mb-2 rounded"
           />
-          <Button variant="primary" onClick={deleteImage}>
+          <Button
+            variant="delete"
+            type="button"
+            onClick={deleteImage}
+          >
             Delete image
           </Button>
         </div>
       )}
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={e => setFile(e.target.files?.[0] || null)}
-      />
+      <div className="form-actions space-y-6">
 
-      <Button type="submit">Save</Button>
+      {(!item.image_path || imageDeleted) && (
+        <ImageUpload
+          file={file}
+          onChange={setFile}
+          disabled={!!item.image_path && !imageDeleted}
+        />
+      )}
+
+        <Button variant="ghost" type="submit">
+          Save
+        </Button>{" "}
+
+        <Button
+          variant="delete"
+          type="button"
+          onClick={() => navigate(-1)}
+        >
+          Cancel
+        </Button>
+
+      </div>
+
     </FormLayout>
+    </PageContainer>
   );
 }

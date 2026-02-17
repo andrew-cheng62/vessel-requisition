@@ -1,15 +1,58 @@
-export function ImageUpload(props: React.InputHTMLAttributes<HTMLInputElement>) {
+import { useRef } from "react";
+import Button from "./Button";
+
+type Props = {
+  file: File | null;
+  onChange: (file: File | null) => void;
+  disabled?: boolean;
+};
+
+export function ImageUpload({ file, onChange, disabled }: Props) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files?.[0] || null;
+    onChange(selected);
+  };
+
   return (
-    <input
-      type="file"
-      accept="image/*"
-      className="block w-full text-sm text-gray-600
-                 file:mr-4 file:py-2 file:px-4
-                 file:rounded-lg file:border-0
-                 file:text-sm file:font-medium
-                 file:bg-indigo-50 file:text-indigo-700
-                 hover:file:bg-indigo-100"
-      {...props}
-    />
-  )
+    <div className="flex items-center gap-3">
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleChange}
+        disabled={disabled}
+      />
+
+      {!file ? (
+        <Button
+          type="button"
+          variant="primary"
+          disabled={disabled}
+          onClick={() => inputRef.current?.click()}
+        >
+          Upload image
+        </Button>
+      ) : (
+        <>
+          <span className="text-sm text-gray-600">
+            {file.name}
+          </span>
+
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => {
+              onChange(null);
+              if (inputRef.current) inputRef.current.value = "";
+            }}
+          >
+            Change
+          </Button>
+        </>
+      )}
+    </div>
+  );
 }

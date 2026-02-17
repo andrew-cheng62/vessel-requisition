@@ -2,6 +2,9 @@ import { useState } from "react";
 import api from "../../api/api";
 import type { RequisitionItem, Requisition } from "../../types";
 import toast from "react-hot-toast";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import styles from "../../styles/Modal.module.css";
 
 type Props = {
   requisitionId: number;
@@ -24,6 +27,7 @@ export default function ReceiveItemModal({
     if (qty <= 0 || qty > remaining) return;
 
     setLoading(true);
+
     try {
       const res = await api.post(
         `/requisitions/${requisitionId}/items/${item.id}/receive`,
@@ -41,43 +45,48 @@ export default function ReceiveItemModal({
   };
 
   return (
- //   <div className="modal-backdrop">
- //     <div className="modal">
-      <div style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.4)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}>
+    <div className={styles.backdrop}>
+      <div className={styles.modal}>
+        <div className={styles.title}>Receive Item</div>
 
-        <h3>Receive item</h3>
+        <div className={styles.section}>
+          <div className="font-medium">{item.item.name}</div>
+          <div className={styles.metaText}>
+            Remaining: {remaining}
+          </div>
+        </div>
 
-        <p>
-          <strong>{item.item.name}</strong>
-        </p>
+        <div className={styles.section}>
+          <Input
+            type="number"
+            min={1}
+            max={remaining}
+            value={qty}
+            onChange={e => setQty(Number(e.target.value))}
+            disabled={loading}
+          />
+        </div>
 
-        <p>Remaining: {remaining}</p>
-
-        <input
-          type="number"
-          min={1}
-          max={remaining}
-          value={qty}
-          onChange={e => setQty(Number(e.target.value))}
-          disabled={loading}
-        />
-
-        <div style={{ marginTop: 16 }}>
-          <button onClick={submit} disabled={loading}>
-            Confirm
-          </button>
-          <button onClick={onClose} disabled={loading}>
+        <div className={styles.actions}>
+          <Button
+            variant="ghost"
+            type="button"
+            onClick={onClose}
+            disabled={loading}
+          >
             Cancel
-          </button>
+          </Button>
+
+          <Button
+            variant="secondary"
+            type="button"
+            onClick={submit}
+            disabled={loading}
+          >
+            {loading ? "Processing..." : "Confirm"}
+          </Button>
         </div>
       </div>
-//    </div>
+    </div>
   );
 }

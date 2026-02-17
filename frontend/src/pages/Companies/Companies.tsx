@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { fetchCompanies } from "../../api/api";
 import type { Company, CompanyRole } from "../../types";
-import FilterBar from "../../components/FilterBar";
+import FilterBar from "../../components/ui/FilterBar";
 import Table from "../../components/ui/Table";
 import Button from "../../components/ui/Button";
 import PageContainer from "../../components/layout/PageContainer";
@@ -60,7 +60,7 @@ export default function Companies() {
     {
       key: "role",
       type: "select",
-      label: "Company type",
+      label: "Company role",
       options: [
         { value: "supplier", label: "Suppliers" },
         { value: "manufacturer", label: "Manufacturers" },

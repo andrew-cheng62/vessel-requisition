@@ -44,6 +44,15 @@ def can_receive(req, user):
         and req.status in {"ordered", "partially_received"}
     )
 
+def can_delete(req, user):
+    # Only captain can delete
+    if user.role != "captain":
+        return False
+
+    # Allow delete only if draft or cancelled
+    return req.status in {"draft", "cancelled"}
+
+
 router = APIRouter(prefix="/requisitions", tags=["Requisitions"])
 
 def get_db():
@@ -314,4 +323,32 @@ def add_item_to_requisition(
     db.commit()
     db.refresh(req)
     return req
+
+@router.delete("/{req_id}")
+def delete_requisition(
+    req_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    req = (
+        db.query(Requisition)
+        .options(joinedload(Requisition.items))
+        .filter(Requisition.id == req_id)
+        .first()
+    )
+
+    if not req:
+        raise HTTPException(404, "Requisition not found")
+
+    if not can_delete(req, current_user):
+        raise HTTPException(403, "Deletion not allowed for this status")
+
+    # Delete child items first (optional if cascade is configured)
+    for item in req.items:
+        db.delete(item)
+
+    db.delete(req)
+    db.commit()
+
+    return {"message": "Requisition deleted"}
 

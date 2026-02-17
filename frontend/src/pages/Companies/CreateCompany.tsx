@@ -1,6 +1,13 @@
 import { useState } from "react";
 import api from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import { FormLayout, FormField } from "../../components/layout/FormLayout";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
+import Select from "../../components/ui/Select";
+import PageContainer from "../../components/layout/PageContainer";
+import { ImageUpload } from "../../components/ui/ImageUpload";
+import toast from "react-hot-toast";
 
 export default function CreateCompany() {
   const navigate = useNavigate();
@@ -14,6 +21,9 @@ export default function CreateCompany() {
   const [isSupplier, setIsSupplier] = useState(false);
   const [logopath, setLogopath] = useState("");
   const [file, setFile] = useState<File | null>(null);
+
+  const [message, setMessage] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -37,42 +47,74 @@ export default function CreateCompany() {
     await api.post(`/companies/${res.data.id}/logo`, formData);
   }
 
-  alert("Company created");
-  navigate("/companies");
+  toast.success("Company created");
+  setTimeout(() => navigate(`/companies/${id}`), 800);
 };
 
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Create Company</h2>
+    <PageContainer title="Add New Company">
 
-      <input placeholder="Name" value={name} onChange={e => setName(e.target.value)} required />
-      <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
-      <input placeholder="Phone" value={phone} onChange={e => setPhone(e.target.value)} />
-      <input placeholder="Website" value={website} onChange={e => setWebsite(e.target.value)} />
-      <input placeholder="Comments" value={comments} onChange={e => setComments(e.target.value)} />
+      <FormLayout onSubmit={handleSubmit}>
 
-      <label>
-        <input type="checkbox" checked={isManufacturer} onChange={e => setIsManufacturer(e.target.checked)} />
-        Manufacturer
-      </label>
+      {message && <p style={{ color: "green" }}>{message}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
       
-      <label>
-        <input type="checkbox" checked={isSupplier} onChange={e => setIsSupplier(e.target.checked)} />
-        Supplier
-      </label>
-
-      <div>
-      <label>
-        Company logo
-      </label>
-       </div>
-        <input
-          type="file"
-          onChange={e => setFile(e.target.files?.[0] || null)}
+        <Input
+          placeholder="Name"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          required
         />
- 
-      <button type="submit">Create</button>
-    </form>
+        <Input
+          placeholder="Email"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+        />
+        <Input
+          placeholder="Phone"
+          value={phone}
+          onChange={e => setPhone(e.target.value)}
+        />
+        <Input
+          placeholder="Website"
+          value={website}
+          onChange={e => setWebsite(e.target.value)}
+        />
+        <Input
+          placeholder="Comments"
+          value={comments}
+          onChange={e => setComments(e.target.value)}
+        />
+
+        <FormField>
+        <label>
+          <input type="checkbox"
+                 checked={isManufacturer}
+                 onChange={e => setIsManufacturer(e.target.checked)}
+          />
+            Manufacturer
+        </label>{"  "}
+      
+        <label>
+          <input type="checkbox"
+                 checked={isSupplier}
+                 onChange={e => setIsSupplier(e.target.checked)}
+         />
+           Supplier
+        </label>
+        </FormField>
+
+      <div className="form-actions space-y-6">
+        <ImageUpload
+          file={file}
+          onChange={setFile}
+        />
+
+        <Button variant="ghost" type="submit">Save</Button>{" "}
+        <Button variant="delete" onClick={() => navigate(-1)}>Cancel</Button>
+      </div>
+    </FormLayout>
+    </PageContainer>
   );
 }

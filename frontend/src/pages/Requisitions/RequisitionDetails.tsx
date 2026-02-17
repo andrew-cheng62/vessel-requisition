@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../api/api";
 import type { Requisition, RequisitionItem } from "../../types";
-import PageCard from "../../components/PageCard/PageCard";
-import StatusActions from "./StatusActions";
+import PageCard from "../../components/layout/PageCard/PageCard";
+import StatusActions from "../../components/status/StatusActions";
 import ReceiveItemModal from "./ReceiveItemModal";
-import styles from "./RequisitionDetails.module.css";
+import styles from "../../styles/RequisitionDetails.module.css";
+import Button from "../../components/ui/Button";
+import toast from "react-hot-toast";
 
 export default function RequisitionDetails() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [req, setReq] = useState<Requisition | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [receiveItem, setReceiveItem] = useState<RequisitionItem | null>(null);
@@ -24,16 +27,33 @@ export default function RequisitionDetails() {
     loadRequisition();
   }, [id]);
 
+  const handleDelete = async () => {
+    if (!window.confirm("Delete this requisition?")) return;
+
+    try {
+      await api.delete(`/requisitions/${id}`);
+      toast.success("Requisition deleted");
+      setTimeout(() => navigate("/requisitions"), 800);
+    } catch (err: any) {
+      toast.error(err.response?.data?.detail || "Delete failed");
+    }
+  };
+
   if (error) return <p style={{ color: "red" }}>{error}</p>;
   if (!req) return <p>Loading…</p>;
+
+  const canDelete =
+    req.status === "draft" || req.status === "cancelled";
+
+  const statusClass = styles[`status_${req.status}`];
 
   return (
     <PageCard>
       <div className={styles.layout}>
         {/* LEFT COLUMN */}
         <div className={styles.sideBox}>
-          <div className={styles.status}>
-            Status: {req.status}
+          <div className={`${styles.statusBadge} ${statusClass}`}>
+            {req.status.replace("_", " ").toUpperCase()}
           </div>
 
           <div className={styles.meta}>
@@ -59,20 +79,26 @@ export default function RequisitionDetails() {
             )}
           </div>
 
-          {/* STATUS CONTROLS */}
           <StatusActions
             req={req}
             setReq={setReq}
             onChange={loadRequisition}
           />
+
+          {canDelete && (
+            <p className="pt-6">
+              <Button variant="delete" onClick={handleDelete}>
+                Delete
+              </Button>
+            </p>
+          )}
         </div>
 
         {/* MAIN COLUMN */}
         <div className={styles.main}>
-          <h2>Requisition #{req.id}</h2>
-
-          {/* ITEMS */}
-          <h3>Items</h3>
+          <h1 className={styles.reqId}>
+            Requisition #{req.id}
+          </h1>
 
           <table className={styles.itemsTable}>
             <thead>
@@ -110,11 +136,9 @@ export default function RequisitionDetails() {
                           req.status
                         ) && (
                           <button
+                            className={styles.receiveBtn}
                             disabled={remaining <= 0}
                             onClick={() => setReceiveItem(line)}
-                            style={{
-                              opacity: remaining <= 0 ? 0.5 : 1,
-                            }}
                           >
                             📦 Receive
                           </button>
@@ -126,11 +150,12 @@ export default function RequisitionDetails() {
             </tbody>
           </table>
 
-          {/* ACTIONS */}
           {req.status === "draft" && (
             <div className={styles.actions}>
               <Link to={`/requisitions/${req.id}/edit`}>
-                <button>✏️ Edit requisition</button>
+                <Button variant="ghost">
+                  ✏️ Edit requisition
+                </Button>
               </Link>
             </div>
           )}

@@ -5,7 +5,7 @@ export default function Table({
 }) {
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
+      <table className="min-w-full table-fixed border-separate border-spacing-0 text-sm">
         {children}
       </table>
     </div>

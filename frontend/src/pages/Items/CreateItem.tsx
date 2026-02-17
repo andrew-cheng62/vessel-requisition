@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import api, { fetchCompanies, fetchCategories } from "../../api/api";
 import type { Company, Category } from "../../types";
 import { useNavigate } from "react-router-dom"; 
-import { FormLayout, FormField } from "../../components/ui/FormLayout";
+import { FormLayout, FormField } from "../../components/layout/FormLayout";
 import Input from "../../components/ui/Input";
-import { ImageUpload } from "../../components/ui/ImageUpload";
 import Button from "../../components/ui/Button";
-import PageContainer from "../../components/layout/PageContainer";
 import Select from "../../components/ui/Select";
+import PageContainer from "../../components/layout/PageContainer";
+import { ImageUpload } from "../../components/ui/ImageUpload";
+import toast from "react-hot-toast";
+
 
 export default function CreateItem() {
   const [name, setName] = useState("");
@@ -18,7 +20,7 @@ export default function CreateItem() {
   const [supplierId, setSupplierId] = useState<number | "">("");
   const [companies, setCompanies] = useState<Company[]>([]);
   const [manufacturers, setManufacturers] = useState<Company[]>([]);
-  const [suppliers, setSuppliers] = useState<Company[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<number | "">("");
 
@@ -46,8 +48,8 @@ export default function CreateItem() {
         description: description || undefined,
         catalogue_nr: catalogueNr || undefined,
         unit,
-        manufacturer_id: manufacturerId === "" ? undefined : manufacturerId,
-        supplier_id: supplierId === "" ? undefined : supplierId,
+        manufacturer_id: manufacturerId || undefined,
+        supplier_id: supplierId || undefined,
         category_id: categoryId  || undefined,
       });
 
@@ -59,109 +61,109 @@ export default function CreateItem() {
         await api.post(`/items/${itemId}/image`, formData);
       }
 
-      setMessage("Item created successfully");
-      navigate("/items");
+      toast.success("Item created successfully");
+      setTimeout(() => navigate(`/items/${itemId}`), 800);
     } catch (err: any) {
-      setError(err.response?.data?.detail ?? "Failed to create item");
+      toast.error(err.response?.data?.detail ?? "Failed to create item");
     }
     
   };
 
   return (
-    <PageContainer title="Create new Item">
-    <FormLayout onSubmit={handleSubmit}>
+    <PageContainer title="Add New Item">
 
-      <FormField label="Select Category">
-        <Select
-          value={categoryId}
-          onChange={e => setCategoryId(e.target.value ? Number(e.target.value) : "")}
-        >
-          <option value="">Bridge</option>
+      <FormLayout onSubmit={handleSubmit}>
+
+        {message && <p style={{ color: "green" }}>{message}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
+          <Select
+            value={categoryId}
+            onChange={e => setCategoryId(e.target.value ? Number(e.target.value) : "")}
+            required
+          >
+            <option value="">Select Category</option>
             {categories.map(c => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </Select>
-      </FormField>
-      <div className="space-y-6"></div>
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+      
+      <Input
+        placeholder="Name"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        required
+      />
 
-      <FormField label="Name">
-        <Input
-          value={name}
-          onChange={e => setName(e.target.value)}
-          required
-        />
-      </FormField>
+      <Input
+        placeholder="Description"
+        value={description}
+        onChange={e => setDescription(e.target.value)}
+      />
 
-      <FormField label="Description">
-        <Input
-          value={description}
-          onChange={e => setDescription(e.target.value)}
-        />
-      </FormField>
+      <Input
+        placeholder="Catalogue number"
+        value={catalogueNr}
+        onChange={e => setCatalogueNr(e.target.value)}
+      />
 
-      <FormField label="Catalogue number">
-        <Input
-          value={catalogueNr}
-          onChange={e => setCatalogueNr(e.target.value)}
-        />
-      </FormField>
-
-      <FormField label="Unit">
-        <Input
-          value={unit}
-          onChange={e => setUnit(e.target.value)}
-          required
-        />
-      </FormField>
+      <Input
+        placeholder="Unit"
+        value={unit}
+        onChange={e => setUnit(e.target.value)}
+        required
+      />
 
       <div className="grid grid-cols-2 gap-4">
-        <Select
-          value={manufacturerId}
-          onChange={e =>
-            setManufacturerId(
-              e.target.value ? Number(e.target.value) : ""
-            )  
-          }
-        >
-          <option value="">Select manufacturer</option>
-          {manufacturers.map(m => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-          </option>
-          ))}
-        </Select>
 
-        <Select
-          value={supplierId}
-          onChange={e =>
-            setSupplierId(
-              e.target.value ? Number(e.target.value) : ""
-            )
-          }
+      <Select
+        value={manufacturerId}
+        onChange={e =>
+          setManufacturerId(
+            e.target.value ? Number(e.target.value) : ""
+          )
+        }
 
-        >
-          <option value="">Select supplier</option>
-          {suppliers.map(s => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-          </option>
-          ))}
-        </Select>
+      >
+        <option value="">Select manufacturer</option>
+        {manufacturers.map(m => (
+          <option key={m.id} value={m.id}>
+            {m.name}
+        </option>
+        ))}
+      </Select>
+
+      <Select
+        value={supplierId}
+        onChange={e =>
+          setSupplierId(
+            e.target.value ? Number(e.target.value) : ""
+          )
+        }
+
+      >
+        <option value="">Select supplier</option>
+        {suppliers.map(s => (
+          <option key={s.id} value={s.id}>
+            {s.name}
+        </option>
+        ))}
+      </Select>
+
       </div>
 
-      <div className="space-y-6"></div>
-
-      <div className="form-actions">
+      <div className="form-actions space-y-6">
         <ImageUpload
-          onChange={e => setFile(e.target.files?.[0] || null)}
+          file={file}
+          onChange={setFile}
         />
-        <Button variant="primary" type="submit">Save</Button>
-        <Button type="button" onClick={() => navigate(-1)}>Cancel</Button>
+
+        <Button variant="ghost" type="submit">Save</Button>{" "}
+        <Button variant="delete" onClick={() => navigate(-1)}>Cancel</Button>
       </div>
     </FormLayout>
     </PageContainer>
   );
-
 }

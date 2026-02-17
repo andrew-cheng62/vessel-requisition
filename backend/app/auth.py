@@ -6,6 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.database import SessionLocal
 from app.models.user import User
+from uuid import UUID
 
 SECRET_KEY = "CHANGE_ME_TO_RANDOM_STRING"
 ALGORITHM = "HS256"
@@ -40,7 +41,9 @@ def create_access_token(data: dict):
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-def get_current_user(token: str = Depends(oauth2_scheme)):
+def get_current_user(token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+    ):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
@@ -49,9 +52,12 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except JWTError:
         raise HTTPException(status_code=401)
 
-    db = SessionLocal()
-    user = db.query(User).filter(User.id == user_id).first()
-    db.close()
+    try:
+        user_uuid = UUID(user_id)
+    except ValueError:
+        raise HTTPException(status_code=401)
+
+    user = db.query(User).filter(User.id == user_uuid).first()
 
     if not user:
         raise HTTPException(status_code=401)

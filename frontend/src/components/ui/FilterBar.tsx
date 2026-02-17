@@ -1,5 +1,5 @@
-import Button from "./ui/Button";
-import Input from "./ui/Input";
+import Button from "./Button";
+import Input from "./Input";
 
 type Option = {
   value: string | number;

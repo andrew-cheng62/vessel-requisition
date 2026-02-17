@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import api, { deleteItem, fetchCompanies } from "../../api/api";
 import type { Item, Supplier, Manufacturer, Company, Category } from "../../types";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
-import FilterBar from "../../components/FilterBar";
+import FilterBar from "../../components/ui/FilterBar";
 import Table from "../../components/ui/Table";
 import Button from "../../components/ui/Button";
 import PageContainer from "../../components/layout/PageContainer";
+import toast from "react-hot-toast";
+
 
 type ItemFilters = {
   search?: string;
@@ -41,7 +43,7 @@ export default function Items() {
   {
     key: "category_id",
     type: "select",
-    label: "All categories",
+    label: "Categories",
     options: categories.map(c => ({
       value: String(c.id),
       label: c.name
@@ -50,7 +52,7 @@ export default function Items() {
   {
     key: "manufacturer_id",
     type: "select",
-    label: "All manufacturers",
+    label: "Manufacturers",
     options: manufacturers.map(m => ({
       value: String(m.id),
       label: m.name
@@ -59,7 +61,7 @@ export default function Items() {
   {
     key: "supplier_id",
     type: "select",
-    label: "All suppliers",
+    label: "Suppliers",
     options: suppliers.map(s => ({
       value: String(s.id),
       label: s.name
@@ -105,8 +107,9 @@ export default function Items() {
     try {
       await deleteItem(id);
       setItems(items.filter(i => i.id !== id));
+      toast.success("Item deleted");
     } catch (err: any) {
-      alert(
+      toast.error(
         err.response?.data?.detail ??
         "Item cannot be deleted because it is used in requisitions"
       );
@@ -129,7 +132,7 @@ export default function Items() {
         navigate(`/requisitions/${res.data.id}`);
       }
     } catch {
-      alert("Failed to order item");
+      toast.error("Failed to order item");
     }
   };
 
@@ -156,23 +159,27 @@ export default function Items() {
         <Table>
           <thead className="bg-gray-50">
             <tr>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Manufacturer</th>
-              <th>Supplier</th>
-              <th>Catalogue Nr</th>
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="max-w-64 px-4 py-3 text-left">Description</th>
+              <th className="px-4 py-3 text-left">Manufacturer</th>
+              <th className="px-4 py-3 text-left">Supplier</th>
+              <th className="px-4 py-3 text-left">Catalogue Nr</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {items.map(item => (
               <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{item.description}</td>
-                <td>{item.manufacturer?.name ?? "—"}</td>
-                <td>{item.supplier?.name ?? "—"}</td>
-                <td>{item.catalogue_nr ?? "—"}</td>
-                <td>
+                <td className="px-4 py-3 text-left">{item.name}</td>
+                <td className="max-w-64 px-4 py-3">
+                  <div className="truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                    {item.description}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-left">{item.manufacturer?.name ?? "—"}</td>
+                <td className="px-4 py-3 text-left">{item.supplier?.name ?? "—"}</td>
+                <td className="px-4 py-3 text-left">{item.catalogue_nr ?? "—"}</td>
+                <td className="px-4 py-3">
                   <Link to={`/items/${item.id}`}>
                     <Button variant="ghost">View</Button>
                   </Link>{" "}
@@ -181,7 +188,7 @@ export default function Items() {
                   </Link>{" "}
                   <Button variant="secondary" onClick={() => handleOrder(item)}>Order
                   </Button>{" "}
-                  <Button variant="danger" onClick={() => handleDelete(item.id)}>Delete
+                  <Button variant="delete" onClick={() => handleDelete(item.id)}>✕
                   </Button>
                 </td>
               </tr>

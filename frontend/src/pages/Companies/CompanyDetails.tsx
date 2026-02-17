@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../api/api";
-import PageCard from "../../components/PageCard/PageCard";
-import styles from "./CompanyDetails.module.css";
+import PageCard from "../../components/layout/PageCard/PageCard";
+import styles from "../../styles/CompanyDetails.module.css";
 import type { Company } from "../../types";
+import Button from "../../components/ui/Button";
+
 
 export default function CompanyDetails() {
   const { id } = useParams();
@@ -75,12 +77,12 @@ export default function CompanyDetails() {
 
           <div className={styles.actions}>
             <Link to={`/companies/${company.id}/edit`}>
-              <button>Edit</button>
+              <Button variant="ghost">Edit</Button>
             </Link>
 
             {company.is_supplier && (
-              <Link to={`/requisitions/new?supplier_id=${company.id}`}>
-                <button>Create requisition</button>
+              <Link to={`/items`}>
+                <Button variant="ghost">Create requisition</Button>
               </Link>
             )}
           </div>

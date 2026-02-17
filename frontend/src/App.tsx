@@ -48,11 +48,10 @@ const router = createBrowserRouter([
 ]);
 
 
-
 export default function App() {
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster position="bottom-right" />
       <RouterProvider router={router} />
     </>
   );

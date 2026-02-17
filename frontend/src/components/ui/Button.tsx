@@ -1,7 +1,7 @@
 import clsx from "clsx"
 
 
-type Variant = "primary" | "secondary" | "danger" | "ghost"
+type Variant = "primary" | "secondary" | "danger" | "ghost" | "delete"
 
 export default function Button({
   children,
@@ -18,13 +18,15 @@ export default function Button({
         "focus:outline-none focus:ring-2 focus:ring-offset-2",
         {
           primary:
-            "bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-400",
+            "bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-400 cursor-pointer",
           secondary:
-            "bg-yellow-200 text-gray-800 hover:bg-yellow-300 focus:ring-yellow-500",
+            "bg-yellow-300 text-gray-800 hover:bg-yellow-200 focus:ring-yellow-500 cursor-pointer",
           danger:
-            "bg-red-200 text-gray-800 hover:bg-red-300 focus:ring-red-500",
+            "bg-red-600 text-white hover:bg-red-400 focus:ring-red-800 cursor-pointer",
           ghost:
-            "bg-transparent text-gray-800 hover:bg-gray-300",
+            "bg-transparent text-gray-800 hover:bg-gray-300 cursor-pointer",
+          delete:
+            "bg-transparent text-red-800 hover:bg-red-300 cursor-pointer",
         }[variant],
         className
       )}

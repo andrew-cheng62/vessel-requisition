@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import api from "../../api/api";
 import { useParams, useNavigate } from "react-router-dom";
 import type { Company } from "../../types";
+import Button from "../../components/ui/Button";
+import Input from "../../components/ui/Input";
+import Select from "../../components/ui/Select";
+import PageContainer from "../../components/layout/PageContainer";
+import { ImageUpload } from "../../components/ui/ImageUpload";
+import { FormLayout, FormField } from "../../components/layout/FormLayout";
+import toast from "react-hot-toast";
+
 
 export default function EditCompany() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +24,7 @@ export default function EditCompany() {
   const [isSupplier, setIsSupplier] = useState(false);
   const [company, setCompany] = useState<Company[]>([]);
   const [file, setFile] = useState<File | null>(null);
+  const [logoDeleted, setLogoDeleted] = useState(false);
 
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -58,10 +67,10 @@ export default function EditCompany() {
         await api.post(`/companies/${id}/logo`, formData);
       }
 
-      setMessage("Company saved successfully");
-      navigate(`/companies/${id}`);
+      toast.success("Company saved successfully");
+      setTimeout(() => navigate(`/companies/${id}`), 800);
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to save company");
+      toast.error(err.response?.data?.detail || "Failed to save company");
     }
   };
 
@@ -71,87 +80,123 @@ export default function EditCompany() {
 
     await api.delete(`/companies/${id}/logo`);
     setCompany(prev => prev ? { ...prev, logo_path: null } : prev);
+    setLogoDeleted(true);
+    toast.success("Company logo deleted successfully");
   };
 
   if (!company) return <p>Loading...</p>;
 
   return (
-    <form onSubmit={handleSave}>
-      <h2>Edit Company</h2>
+
+    <PageContainer title="Edit Company">
+      <FormLayout onSubmit={handleSave}>
 
       {message && <p style={{ color: "green" }}>{message}</p>}
       {error && <p style={{ color: "red" }}>{error}</p>}
 
-      <input
-        placeholder="Name"
-        value={name}
-        onChange={e => setName(e.target.value)}
-        required
-      />
+        <FormField label="Edit Name">
+          <Input
+            placeholder="Name"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            required
+         />
+        </FormField>
 
-      <input
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-      />
-
-      <input
-        placeholder="Phone"
-        value={phone}
-        onChange={e => setPhone(e.target.value)}
-      />
-
-      <input
-        placeholder="Website"
-        value={website}
-        onChange={e => setWebsite(e.target.value)}
-      />
-      
-      <input
-        placeholder="Comments"
-        value={comments}
-        onChange={e => setComments(e.target.value)}
-      />
-
-      <label>
-        <input
-          type="checkbox"
-          checked={isManufacturer}
-          onChange={e => setIsManufacturer(e.target.checked)}
+        <FormField label="Edit e-mail">
+          <Input
+            placeholder="Email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
         />
-        Manufacturer
-      </label>
+        </FormField>
 
-      <label>
-        <input
-          type="checkbox"
-          checked={isSupplier}
-          onChange={e => setIsSupplier(e.target.checked)}
+        <FormField label="Edit Phone">
+          <Input
+            placeholder="Phone"
+            value={phone}
+            onChange={e => setPhone(e.target.value)}
         />
-        Supplier
-      </label>
+        </FormField>
+
+        <FormField label="Edit Website">
+          <Input
+            placeholder="Website"
+            value={website}
+            onChange={e => setWebsite(e.target.value)}
+        />
+        </FormField>
+
+        <FormField label="Edit Comments">
+          <Input
+            placeholder="Comments"
+            value={comments}
+            onChange={e => setComments(e.target.value)}
+        />
+        </FormField>
+
+        <FormField>
+          <label>
+            <input
+              type="checkbox"
+              checked={isManufacturer}
+              onChange={e => setIsManufacturer(e.target.checked)}
+            />
+            Manufacturer
+          </label>{" "}
+
+          <label>
+            <input
+              type="checkbox"
+              checked={isSupplier}
+              onChange={e => setIsSupplier(e.target.checked)}
+            />
+            Supplier
+          </label>
+          </FormField>
 
       {/* LOGO PREVIEW */}
-      {company.logo_path && (
+      {company.logo_path && !logoDeleted && (
         <div>
           <img
             src={`http://localhost:8000/${company.logo_path}`}
-            style={{ width: 150, display: "block", marginBottom: 8 }}
+            className="w-40 mb-2 rounded"
           />
-          <button type="button" onClick={deleteLogo}>
+          <Button
+            variant="delete"
+            type="button"
+            onClick={deleteLogo}
+          >
             Delete logo
-          </button>
+          </Button>
         </div>
       )}
+ 
+     <div className="form-actions space-y-6">
 
-      <input
-        type="file"
-        accept="logo/*"
-        onChange={e => setFile(e.target.files?.[0] || null)}
-      />
+     {(!company.logo_path || logoDeleted) && (
 
+        <ImageUpload
+          file={file}
+          onChange={setFile}
+          disabled={!!company.logo_path && !logoDeleted}
+        />
+     )}
 
-      <button type="submit">Save</button>
-    </form>
+        <Button variant="ghost" type="submit">
+          Save
+        </Button>
+
+        <Button
+          variant="delete"
+          type="button"
+          onClick={() => navigate(-1)}
+        >
+          Cancel
+        </Button>
+
+      </div>
+    </FormLayout>
+    </PageContainer>
   );
 }

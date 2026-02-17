@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../../api/api";
-import PageCard from "../../components/PageCard/PageCard";
-import styles from "./ItemDetails.module.css";
+import PageCard from "../../components/layout/PageCard/PageCard";
+import styles from "../../styles/ItemDetails.module.css";
 import type { Item } from "../../types";
+import Button from "../../components/ui/Button";
 
 export default function ItemDetails() {
   const { id } = useParams();
@@ -63,13 +64,13 @@ export default function ItemDetails() {
 
           <div className={styles.actions}>
             <Link to={`/requisitions/new?itemId=${item.id}`}>
-              <button className={styles.primaryButton}>
+              <Button variant="secondary">
                 Order
-              </button>
+              </Button>
             </Link>
 
             <Link to={`/items/${item.id}/edit`}>
-              <button>Edit</button>
+              <Button variant="ghost">Edit</Button>
             </Link>
           </div>
         </div>
