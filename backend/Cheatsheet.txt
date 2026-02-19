@@ -123,3 +123,24 @@ def downgrade():
 <div className="space-y-6"> ---- for spacing between fields/divs
 <div className="flex gap-4">
 <div className="grid grid-cols-2 gap-4">
+===============================================================
+working with git:
+The Standard Update Cycle
+To upload a new version, run these commands in order from your project's root directory:
+
+1. Stage your changes
+This tells Git which files you want to include in the next "snapshot."
+
+git add .
+(The . adds all modified and new files. You can also add a specific file using git add filename.js.)
+
+2. Commit your changes
+This saves the snapshot to your local history with a descriptive note.
+
+git commit -m "Explain what you changed in this version"
+
+3. Push to the remote server
+This "uploads" your local commits to the cloud.
+
+git push
+Note: If it's your first time pushing a specific branch, you might need to use git push origin main (or master).

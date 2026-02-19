@@ -160,7 +160,7 @@ export default function RequisitionsList() {
                       >
                         {deletingId === r.id
                           ? "Deleting..."
-                          : "✕"}
+                          : "❌"}
                       </Button>
                     )}
                   </td>

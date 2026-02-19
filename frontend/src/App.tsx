@@ -41,7 +41,8 @@ const router = createBrowserRouter([
       { path: "/requisitions/new", element: <CreateRequisition /> },
       { path: "/requisitions", element: <RequisitionsList /> },
       { path: "/requisitions/:id", element: <RequisitionDetails /> },
-      { path: "/requisitions/:id/edit", element: <EditRequisition /> }
+      { path: "/requisitions/:id/edit", element: <EditRequisition /> },
+      { path: "/requisitions/:id/export", element: <RequisitionDetails /> }
 
     ],
   },

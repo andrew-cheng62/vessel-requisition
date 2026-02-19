@@ -177,22 +177,20 @@ export default function RequisitionDetails() {
             </tbody>
           </table>
 
-          <div className={styles.actions}>
-            {["draft", "rfq_sent"].includes(
-              req.status
-            ) && (
+          {req.status === "draft" && (
+            <div className={styles.actions}>
               <Link to={`/requisitions/${req.id}/edit`}>
                 <Button variant="ghost">
                   ✏️ Edit requisition
                 </Button>
               </Link>
-            )}
-            <Button variant="secondary" onClick={() => handleExport()}>
-              Export to Excel
-            </Button>
-          </div>
-
+            </div>
+          )}
         </div>
+
+        <Button variant="secondary" onClick={() => handleExport()}>
+           Export to Excel
+        </Button>
 
       </div>
 

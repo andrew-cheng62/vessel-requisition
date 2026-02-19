@@ -1,6 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from datetime import datetime
+from fastapi.responses import StreamingResponse
+from openpyxl import Workbook
+from openpyxl.styles import Font, Border, Side, Alignment
+from io import BytesIO
 
 from app.database import SessionLocal
 from app.models.requisition import Requisition
@@ -352,3 +356,91 @@ def delete_requisition(
 
     return {"message": "Requisition deleted"}
 
+@router.get("/{req_id}/export")
+def export_requisition(req_id: int, db=Depends(get_db)):
+    req = db.query(Requisition).filter(Requisition.id == req_id).first()
+
+    if not req:
+        return {"detail": "Not found"}
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Requisition"
+
+    thin = Side(border_style="thin")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+    # ===== HEADER INFO =====
+    ws["B1"] = "Requisition ID"
+    ws["C1"] = req.id
+
+    ws["B2"] = "Status"
+    ws["C2"] = req.status
+
+    ws["B3"] = "Supplier"
+    ws["C3"] = req.supplier.name if req.supplier else ""
+
+    ws["B4"] = "Created"
+    ws["C4"] = req.created_at.strftime("%d-%m-%Y")
+
+    # ===== TABLE HEADER =====
+    ws.append([])
+    ws.append(["Nr", "Item", "Unit", "Qty", "Received", "Description"])
+    center = Alignment(horizontal="center")
+
+    header_row = ws[6]
+    for cell in header_row:
+        cell.font = Font(bold=True)
+        cell.alignment = center
+
+    for idx, item in enumerate(req.items, start=1):
+        ws.append([
+            idx,
+            item.item.name,
+            item.item.unit,
+            item.quantity,
+            item.received_qty,
+            item.item.description or ""
+        ])
+
+    for row in ws.iter_rows(min_row=6):
+        for cell in row:
+            cell.border = border
+            cell.alignment = Alignment(vertical='center')
+
+    ws.column_dimensions["A"].width = 6   # #
+    for cell in ws["A"]:
+        cell.alignment = center
+    ws.column_dimensions["C"].width = 12  # Unit
+    for cell in ws["C"]:
+        cell.alignment = center
+    ws.column_dimensions["D"].width = 12  # Quantity
+    for cell in ws["D"]:
+        cell.alignment = center
+    ws.column_dimensions["E"].width = 12  # Received
+    for cell in ws["E"]:
+        cell.alignment = center
+
+    # Auto column width
+    for col in ws.columns:
+        max_length = 0
+        column = col[0].column_letter
+        for cell in col:
+            try:
+                if len(str(cell.value)) > max_length:
+                    max_length = len(str(cell.value))
+            except:
+                pass
+        ws.column_dimensions[column].width = max_length + 2
+
+    buffer = BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename=requisition_{req.id}.xlsx"
+        },
+    )

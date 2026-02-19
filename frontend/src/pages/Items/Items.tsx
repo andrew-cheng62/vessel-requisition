@@ -188,7 +188,7 @@ export default function Items() {
                   </Link>{" "}
                   <Button variant="secondary" onClick={() => handleOrder(item)}>Order
                   </Button>{" "}
-                  <Button variant="delete" onClick={() => handleDelete(item.id)}>✕
+                  <Button variant="delete" onClick={() => handleDelete(item.id)}>❌
                   </Button>
                 </td>
               </tr>

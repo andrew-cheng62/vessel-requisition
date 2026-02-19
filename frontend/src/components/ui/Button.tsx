@@ -26,7 +26,7 @@ export default function Button({
           ghost:
             "bg-transparent text-gray-800 hover:bg-gray-300 cursor-pointer",
           delete:
-            "bg-transparent text-red-800 hover:bg-red-300 cursor-pointer",
+            "bg-transparent text-red-800 hover:bg-red-200 cursor-pointer",
         }[variant],
         className
       )}
