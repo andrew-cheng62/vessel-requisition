@@ -41,6 +41,8 @@ Working with database with Alembic
 
 Step 1 — Decide what you want to change:
 
+Change model FIRST!!!!
+
 Example:
 + add is_primary to item_images
 + add index on item_id
@@ -50,9 +52,11 @@ Step 2 — Create Alembic migration
 
 From backend/: (venv)
 
+alembic revision --autogenerate
+or
 python -m alembic revision -m "primary image make unique"
 or
-alembic revision -m "alter columns companies2"
+alembic revision -m "add column is_active to items"
 
 ### python -m alembic revision --autogenerate -m "add item images" ###
 

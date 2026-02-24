@@ -56,7 +56,7 @@ export default function FilterBar({
             <div key={f.key} className="flex flex-col gap-1">
               <label className="text-xs text-gray-500">{f.label}</label>
               <select
-                className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500"
                 value={filters[f.key] ?? ""}
                 onChange={(e) =>
                   onChange(f.key, e.target.value || undefined)

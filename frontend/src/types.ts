@@ -7,7 +7,8 @@ export type Company = {
   is_manufacturer?: boolean;
   is_supplier?: boolean;
   comments?: string;
-  logo_path?: string
+  logo_path?: string;
+  is_active: boolean
 };
 
 export type CompanyCreate = {
@@ -21,7 +22,7 @@ export type CompanyCreate = {
 export type Item = {
   id: number;
   name: string;
-  description?: string;
+  desc_short?: string;
   catalogue_nr?: string;
   unit: string;
   manufacturer?: Company | null;
@@ -29,6 +30,8 @@ export type Item = {
   category?: Category;
   image_path?: string;
   created_at: string
+  desc_long?: text;
+  is_active: boolean
 };
 
 export type ItemCreate = {
@@ -60,10 +63,11 @@ export type RequisitionItem = {
 export type Requisition = {
   id: number;
   status: string;
-  notes: text;
+  notes: string;
   created_at: string;
   supplier?: Company;
   items: RequisitionItem[]
+  is_active: boolean
 };
 
 export type RequisitionEditLine = {

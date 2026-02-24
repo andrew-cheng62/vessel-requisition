@@ -15,15 +15,4 @@ class Company(Base):
 
     is_manufacturer = Column(Boolean, default=False)
     is_supplier = Column(Boolean, default=False)
-
-    manufactured_items = relationship(
-        "Item",
-        foreign_keys="Item.manufacturer_id",
-        back_populates="manufacturer",
-    )
-
-#    supplied_items = relationship(
-#        "Item",
-#        foreign_keys="Item.supplier_id",
-#        back_populates="supplier",
-#    )
+    is_active = Column(Boolean, default=True, nullable=False)

@@ -7,7 +7,7 @@ import Table from "../../components/ui/Table";
 import Button from "../../components/ui/Button";
 import PageContainer from "../../components/layout/PageContainer";
 import StatusBadge from "../../components/status/StatusBadge";
-
+import Pagination from "../../components/ui/Pagination";
 import toast from "react-hot-toast";
 
 const STATUSES = [
@@ -25,6 +25,10 @@ export default function RequisitionsList() {
   const [loading, setLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(1);
+  const pageSize = Number(searchParams.get("page_size") ?? 10);
+  const currentPage = Number(searchParams.get("page") ?? 1);
 
   const filters = {
     status: searchParams.get("status") ?? "",
@@ -33,23 +37,30 @@ export default function RequisitionsList() {
 
   // load suppliers once
   useEffect(() => {
-    fetchCompanies({ role: "supplier" }).then(setSuppliers);
+    fetchCompanies({ role: "supplier" }).then(res => setSuppliers(res.items));
   }, []);
 
   // fetch data on URL change
   useEffect(() => {
     setLoading(true);
 
-    const params: any = {};
+    const params: any = {
+      page: Number(searchParams.get("page") ?? 1),
+      page_size: pageSize
+    };
     if (filters.status) params.status = filters.status;
     if (filters.supplier_id)
       params.supplier_id = Number(filters.supplier_id);
 
     api
       .get("/requisitions", { params })
-      .then(res => setData(res.data))
+      .then(res => {
+        setData(res.data.items);
+        setTotal(res.data.total);
+        setPages(res.data.pages);
+      })
       .finally(() => setLoading(false));
-  }, [searchParams]);
+  }, [searchParams, pageSize]);
 
   const updateFilter = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams);
@@ -107,6 +118,12 @@ export default function RequisitionsList() {
     },
   ];
 
+  const changePage = (newPage: number) => {
+    const next = new URLSearchParams(searchParams);
+    next.set("page", String(newPage));
+    setSearchParams(next);
+  };
+
   return (
     <PageContainer title="Requisitions">
       <FilterBar
@@ -115,6 +132,27 @@ export default function RequisitionsList() {
         onChange={updateFilter}
         onReset={resetFilters}
       />
+
+      {/* Page size selector */}
+      <div className="place-items-end">
+       <div>
+         <select
+           value={pageSize}
+           onChange={(e) => {
+             const next = new URLSearchParams(searchParams);
+             next.set("page_size", e.target.value);
+             next.set("page", "1"); // reset page
+             setSearchParams(next);
+           }}
+           className="border px-2 py-1 rounded"
+         >
+           <option value={5}>5</option>
+           <option value={10}>10</option>
+           <option value={20}>20</option>
+           <option value={50}>50</option>
+         </select>
+       </div>
+     </div>      
 
       {loading && <p className="text-sm text-gray-500">Loading…</p>}
       {!loading && data.length === 0 && <p>No requisitions found</p>}
@@ -160,7 +198,7 @@ export default function RequisitionsList() {
                       >
                         {deletingId === r.id
                           ? "Deleting..."
-                          : "❌"}
+                          : "🞬"}
                       </Button>
                     )}
                   </td>
@@ -170,6 +208,13 @@ export default function RequisitionsList() {
           </tbody>
         </Table>
       )}
+
+      <Pagination
+        page={currentPage}
+        pages={pages}
+        onChange={changePage}
+      />
+
     </PageContainer>
   );
 }

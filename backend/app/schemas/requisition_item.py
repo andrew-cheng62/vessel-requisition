@@ -6,7 +6,7 @@ from app.schemas.item import ItemOut
 class RequisitionItemBase(BaseModel):
     item_id: int
     quantity: int
-    unit: Optional[str] = None
+    unit: str
 
 
 class RequisitionItemCreate(BaseModel):

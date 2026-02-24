@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 class CompanyBase(BaseModel):
     name: str
@@ -9,6 +10,7 @@ class CompanyBase(BaseModel):
     is_supplier: bool = False
     comments: str | None = None
     logo_path: str | None = None
+    is_active: bool = True
 
 class CompanyCreate(CompanyBase):
     pass
@@ -21,3 +23,10 @@ class CompanyOut(CompanyBase):
 
     class Config:
         from_attributes = True
+
+class PaginatedCompany(BaseModel):
+    items: List[CompanyOut]
+    total: int
+    page: int
+    page_size: int
+    pages: int

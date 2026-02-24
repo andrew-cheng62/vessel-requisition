@@ -4,9 +4,7 @@ import type { Item, Company, Category, CompanyRole } from "../types";
 const api = axios.create({
   baseURL: "http://localhost:8000",
 });
-export default api;
 
-// attach token automatically (later)
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -15,6 +13,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+export default api;
 
 export const createItem = async (data: ItemCreate) => {
   return api.post("/items/", data);
@@ -44,9 +43,8 @@ export const fetchCategories = async (): Promise<Category[]> => {
   return res.data;
 };
 
-export const deleteItem = async (id: number) => {
-  return api.delete(`/items/${id}`);
-};
+export const setItemActive = (id: number, active: boolean) =>
+  api.patch(`/items/${id}/active`, { is_active: active });
 
 export const uploadCompanyLogo = async (
   companyId: number,

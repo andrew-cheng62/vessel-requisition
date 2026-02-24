@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session, joinedload
 from datetime import datetime
 from fastapi.responses import StreamingResponse
 from openpyxl import Workbook
 from openpyxl.styles import Font, Border, Side, Alignment
 from io import BytesIO
+from math import ceil
 
 from app.database import SessionLocal
 from app.models.requisition import Requisition
@@ -13,7 +14,7 @@ from app.models.item import Item
 from app.models.company import Company
 from app.models.user import User
 from app.auth import get_current_user
-from app.schemas.requisition import ( RequisitionCreate, RequisitionUpdate, RequisitionOut)
+from app.schemas.requisition import (RequisitionCreate, RequisitionUpdate, RequisitionOut, PaginatedRequisitions)
 
 # Helpers
 ALLOWED_STATUS_TRANSITIONS = {
@@ -55,7 +56,6 @@ def can_delete(req, user):
 
     # Allow delete only if draft or cancelled
     return req.status in {"draft", "cancelled"}
-
 
 router = APIRouter(prefix="/requisitions", tags=["Requisitions"])
 
@@ -108,8 +108,10 @@ def create_requisition(
         raise
 
 
-@router.get("/", response_model=list[RequisitionOut])
+@router.get("/", response_model=PaginatedRequisitions)
 def list_requisitions(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     status: str | None = None,
     supplier_id: int | None = None,
     db: Session = Depends(get_db),
@@ -128,7 +130,23 @@ def list_requisitions(
     if supplier_id:
         q = q.filter(Requisition.supplier_id == supplier_id)
 
-    return q.order_by(Requisition.created_at.desc()).all()
+    total = q.count()
+
+    items = (
+        q
+        .order_by(Requisition.created_at.desc())
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages": ceil(total / page_size)
+    }
 
 
 @router.post("/{req_id}/status", response_model=RequisitionOut) # only Captain can change status, crew can only receive
@@ -327,34 +345,6 @@ def add_item_to_requisition(
     db.commit()
     db.refresh(req)
     return req
-
-@router.delete("/{req_id}")
-def delete_requisition(
-    req_id: int,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
-):
-    req = (
-        db.query(Requisition)
-        .options(joinedload(Requisition.items))
-        .filter(Requisition.id == req_id)
-        .first()
-    )
-
-    if not req:
-        raise HTTPException(404, "Requisition not found")
-
-    if not can_delete(req, current_user):
-        raise HTTPException(403, "Deletion not allowed for this status")
-
-    # Delete child items first (optional if cascade is configured)
-    for item in req.items:
-        db.delete(item)
-
-    db.delete(req)
-    db.commit()
-
-    return {"message": "Requisition deleted"}
 
 @router.get("/{req_id}/export")
 def export_requisition(req_id: int, db=Depends(get_db)):

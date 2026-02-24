@@ -11,16 +11,15 @@ class RequisitionBase(BaseModel):
     supplier_id: Optional[int] = None
     notes: Optional[str] = None
 
-
 class RequisitionCreate(RequisitionBase):
     items: List[RequisitionItemCreate]
-
 
 class RequisitionUpdate(BaseModel):
     supplier_id: Optional[int] = None
     status: Optional[list[RequisitionItemCreate]] = None
     notes: Optional[str] = None
     items: List[RequisitionItemCreate]
+    is_active: bool
 
 class RequisitionOut(BaseModel):
     id: int
@@ -29,7 +28,15 @@ class RequisitionOut(BaseModel):
     supplier: Optional[CompanyOut] = None
     notes: Optional[str] = None
     items: List[RequisitionItemOut]
+    is_active: bool
 
     model_config = {
         "from_attributes": True
     }
+
+class PaginatedRequisitions(BaseModel):
+    items: List[RequisitionOut]
+    total: int
+    page: int
+    page_size: int
+    pages: int

@@ -5,8 +5,9 @@ from pathlib import Path
 from app.auth import get_current_user
 from app.database import SessionLocal
 from app.models.company import Company
-from app.schemas.company import CompanyCreate, CompanyUpdate, CompanyOut
+from app.schemas.company import CompanyCreate, CompanyUpdate, CompanyOut, PaginatedCompany
 from uuid import uuid4
+from math import ceil
 import os
 
 router = APIRouter(prefix="/companies", tags=["Companies"])
@@ -33,8 +34,10 @@ def create_company(
     return company
 
 
-@router.get("/", response_model=list[CompanyOut])
+@router.get("/", response_model=PaginatedCompany)
 def list_companies(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     search: Optional[str] = Query(None),
     role: Optional[str] = Query(
         None, description="supplier | manufacturer"
@@ -43,17 +46,32 @@ def list_companies(
 ):
     q = db.query(Company)
 
-    # 🔍 TEXT SEARCH
     if search:
         q = q.filter(Company.name.ilike(f"%{search}%"))
 
-    # 🏷️ ROLE FILTER
     if role == "supplier":
         q = q.filter(Company.is_supplier == True)
+
     if role == "manufacturer":
         q = q.filter(Company.is_manufacturer == True)
 
-    return q.order_by(Company.name).all()
+    total = q.count()
+
+    items = (
+        q
+        .order_by(Company.name)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages": ceil(total / page_size)
+    }
 
 @router.get("/{company_id}", response_model=CompanyOut)
 def get_company(company_id: int, db: Session = Depends(get_db)):

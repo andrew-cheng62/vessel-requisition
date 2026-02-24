@@ -21,6 +21,7 @@ export default function CreateCompany() {
   const [isSupplier, setIsSupplier] = useState(false);
   const [logopath, setLogopath] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [isActive, setIsactive] = useState(true);
 
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +49,7 @@ export default function CreateCompany() {
   }
 
   toast.success("Company created");
-  setTimeout(() => navigate(`/companies/${id}`), 800);
+  setTimeout(() => navigate(`/companies/`), 800);
 };
 
 

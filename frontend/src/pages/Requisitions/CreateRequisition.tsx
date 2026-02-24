@@ -21,8 +21,8 @@ export default function CreateRequisition() {
   /* LOAD DATA */
 
   useEffect(() => {
-    fetchCompanies({ is_supplier: true }).then(setCompanies);
-    fetchItems().then(setItems);
+    fetchCompanies({ is_supplier: true }).then(res => setCompanies(res.items));
+    fetchItems().then(res => setItems(res.items));
   }, []);
 
 

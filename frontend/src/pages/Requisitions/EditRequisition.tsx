@@ -26,8 +26,8 @@ export default function EditRequisition() {
 
   /* LOAD DATA */
   useEffect(() => {
-    fetchCompanies().then(setCompanies);
-    fetchItems().then(setItems);
+    fetchCompanies().then(res => setCompanies(res.items));
+    fetchItems().then(res => setItems(res.items));
 
     api.get(`/requisitions/${id}`).then(res => {
       const r = res.data;

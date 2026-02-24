@@ -13,7 +13,8 @@ import toast from "react-hot-toast";
 
 export default function CreateItem() {
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [descShort, setDescshort] = useState("");
+  const [descLong, setDesclong] = useState("");
   const [catalogueNr, setCatalogueNr] = useState("");
   const [unit, setUnit] = useState("");
   const [manufacturerId, setManufacturerId] = useState<number | "">("");
@@ -23,6 +24,7 @@ export default function CreateItem() {
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoryId, setCategoryId] = useState<number | "">("");
+  const [isActive, setIsactive] = useState(true);
 
   const [file, setFile] = useState<File | null>(null);
 
@@ -33,8 +35,8 @@ export default function CreateItem() {
 
   // CORRECT: load suppliers on mount
   useEffect(() => {
-    fetchCompanies({ role: "supplier" }).then(setSuppliers);
-    fetchCompanies({ role: "manufacturer" }).then(setManufacturers);
+    fetchCompanies({ role: "supplier" }).then(res => setSuppliers(res.items));
+    fetchCompanies({ role: "manufacturer" }).then(res => setManufacturers(res.items));
     fetchCategories().then(setCategories)
   }, []);
 
@@ -45,12 +47,14 @@ export default function CreateItem() {
     try {
       const res = await api.post("/items/", {
         name,
-        description: description || undefined,
+        desc_short: descShort || undefined,
         catalogue_nr: catalogueNr || undefined,
         unit,
         manufacturer_id: manufacturerId || undefined,
         supplier_id: supplierId || undefined,
         category_id: categoryId  || undefined,
+        desc_long: descLong || undefined,
+        is_active: isActive || true
       });
 
       const itemId = res.data.id;
@@ -98,9 +102,15 @@ export default function CreateItem() {
       />
 
       <Input
-        placeholder="Description"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
+        placeholder="Short description"
+        value={descShort}
+        onChange={e => setDescshort(e.target.value)}
+      />
+
+      <Input
+        placeholder="Full description"
+        value={descLong}
+        onChange={e => setDesclong(e.target.value)}
       />
 
       <Input

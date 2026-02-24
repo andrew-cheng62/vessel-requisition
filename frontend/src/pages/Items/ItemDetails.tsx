@@ -35,7 +35,7 @@ export default function ItemDetails() {
         {/* DETAILS */}
         <div>
           <h2 className={styles.title}>{item.name}</h2>
-          <p>{item.description || "No description provided"}</p>
+          <p>{item.desc_short || ""}</p>
 
           <table className={styles.metaTable}>
             <tbody>
@@ -61,6 +61,8 @@ export default function ItemDetails() {
               </tr>
             </tbody>
           </table>
+
+          <p>{item.desc_long || ""}</p>
 
           <div className={styles.actions}>
             <Link to={`/requisitions/new?itemId=${item.id}`}>

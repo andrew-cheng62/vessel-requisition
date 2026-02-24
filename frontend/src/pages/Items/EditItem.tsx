@@ -18,7 +18,8 @@ export default function EditItem() {
   const [item, setItem] = useState<Item | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [descShort, setDescshort] = useState("");
+  const [descLong, setDesclong] = useState("");
   const [catalogueNr, setCatalogueNr] = useState("");
   const [unit, setUnit] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
@@ -29,14 +30,15 @@ export default function EditItem() {
   const [suppliers, setSuppliers] = useState<Company[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [imageDeleted, setImageDeleted] = useState(false);
+  const [isActive, setIsactive] = useState(true);
 
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /* LOAD COMPANIES AND CATEGORIES */
   useEffect(() => {
-    fetchCompanies({ role: "manufacturer" }).then(setManufacturers);
-    fetchCompanies({ role: "supplier" }).then(setSuppliers);
+    fetchCompanies({ role: "manufacturer" }).then(res => setManufacturers(res.items));
+    fetchCompanies({ role: "supplier" }).then(res => setSuppliers(res.items));
     fetchCategories().then(setCategories);
   }, []);
 
@@ -46,12 +48,14 @@ export default function EditItem() {
       const data = res.data;
       setItem(data);
       setName(data.name);
-      setDescription(data.description || "");
+      setDescshort(data.desc_short || "");
+      setDesclong(data.desc_long || "");
       setCatalogueNr(data.catalogue_nr || "");
       setUnit(data.unit);
       setCategoryId(data.category?.id ?? "");
       setManufacturerId(data.manufacturer?.id ?? "");
       setSupplierId(data.supplier?.id ?? "");
+      setIsactive(data.is_active)
     });
   }, [id]);
 
@@ -64,12 +68,14 @@ export default function EditItem() {
     try {
       await api.put(`/items/${id}`, {
         name,
-        description: description || undefined,
+        desc_short: descShort || undefined,
+        desc_long: descLong || undefined,
         catalogue_nr: catalogueNr || undefined,
         unit,
         category_id: categoryId || undefined,
         manufacturer_id: manufacturerId || undefined,
-        supplier_id: supplierId || undefined
+        supplier_id: supplierId || undefined,
+        is_active: isActive
       });
 
       if (file) {
@@ -125,8 +131,12 @@ export default function EditItem() {
           <Input value={name} onChange={e => setName(e.target.value)} required />
         </FormField>
 
-        <FormField label="Edit Description">
-          <Input value={description} onChange={e => setDescription(e.target.value)} />
+        <FormField label="Edit short description">
+          <Input value={descShort} onChange={e => setDescShort(e.target.value)} />
+        </FormField>
+
+        <FormField label="Edit full description">
+          <Input value={descLong} onChange={e => setDescLong(e.target.value)} />
         </FormField>
 
         <FormField label="Edit Catalog Nr">

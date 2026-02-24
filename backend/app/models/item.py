@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Boolean, Text
 from datetime import datetime
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
@@ -14,7 +14,7 @@ class Item(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
-    description = Column(String)
+    desc_short = Column(String, nullable=True)
     unit = Column(String, nullable=False)
     manufacturer_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
     supplier_id = Column(Integer, ForeignKey("companies.id"), nullable=True)
@@ -23,6 +23,8 @@ class Item(Base):
     created_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="RESTRICT"), nullable=False)
+    desc_long = Column(Text, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
 
     category = relationship("Category")
     manufacturer = relationship("Company", foreign_keys=[manufacturer_id])

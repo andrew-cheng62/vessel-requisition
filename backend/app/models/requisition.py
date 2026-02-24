@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, Text
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, String, Boolean, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
@@ -17,7 +17,8 @@ class Requisition(Base):
     ordered_at = Column(DateTime)
     created_by = Column(UUID, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
-    notes = Column(Text, nullable=True)
+    notes = Column(String, nullable=True)
+    is_active = Column(Boolean, default=True, nullable=False)
 
     items = relationship(
         "RequisitionItem",

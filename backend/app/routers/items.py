@@ -7,11 +7,21 @@ from app.models.item import Item
 from app.models.user import User
 from app.models.company import Company
 from app.models.category import Category
-from app.schemas.item import ItemOut, ItemUpdate, ItemCreate
+from app.schemas.item import (ItemOut, ItemUpdate, ItemCreate, PaginatedItems, ItemActiveUpdate)
 from uuid import uuid4
 from typing import Optional
 from pathlib import Path
+from math import ceil
 import os
+from sqlalchemy import exists
+from app.models import RequisitionItem, Requisition
+
+ACTIVE_STATUSES = [
+    "draft",
+    "rfq_sent",
+    "ordered",
+    "partially_received",
+]
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
@@ -32,6 +42,11 @@ def validate_category(db: Session, category_id: int | None):
     if not category:
         raise HTTPException(status_code=400, detail="Invalid category_id")
 
+def require_captain(current_user: User = Depends(get_current_user)):
+    if current_user.role != "captain":
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return current_user
+
 @router.post("/", response_model=ItemOut)
 def create_item(
     item: ItemCreate,
@@ -49,15 +64,18 @@ def create_item(
     db.refresh(db_item)
     return db_item
 
-@router.get("/", response_model=list[ItemOut])
+@router.get("/", response_model=PaginatedItems)
 def get_items(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
     search: Optional[str] = Query(None),
     category_id: Optional[int] = Query(None),
     manufacturer_id: Optional[int] = Query(None),
     supplier_id: Optional[int] = Query(None),
     db: Session = Depends(get_db),
+    is_active: Optional[str] = None
 ):
-    query = (
+    q = (
         db.query(Item)
         .options(
             joinedload(Item.manufacturer),
@@ -66,19 +84,40 @@ def get_items(
         )
     )
 
+    if is_active == "true":
+        q = q.filter(Item.is_active == True)
+    elif is_active == "false":
+        q = q.filter(Item.is_active == False)
+
     if search:
-        query = query.filter(Item.name.ilike(f"%{search}%"))
+        q = q.filter(Item.name.ilike(f"%{search}%"))
 
     if category_id:
-        query = query.filter(Item.category_id == category_id)
+        q = q.filter(Item.category_id == category_id)
 
     if manufacturer_id:
-        query = query.filter(Item.manufacturer_id == manufacturer_id)
+        q = q.filter(Item.manufacturer_id == manufacturer_id)
 
     if supplier_id:
-        query = query.filter(Item.supplier_id == supplier_id)
+        q = q.filter(Item.supplier_id == supplier_id)
 
-    return query.order_by(Item.name).all()
+    total = q.count()
+
+    items = (
+        q
+        .order_by(Item.name)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+        .all()
+    )
+
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "pages": ceil(total / page_size)
+    }
 
 @router.get("/{item_id}", response_model=ItemOut)
 def get_item(item_id: int, db: Session = Depends(get_db)):
@@ -127,31 +166,6 @@ def upload_item_image(
         "image_path": relative_path
     }
 
-@router.delete("/{item_id}")
-def delete_item(
-    item_id: int,
-    db: Session = Depends(get_db),
-    user=Depends(get_current_user),
-):
-    item = db.query(Item).filter(Item.id == item_id).first()
-
-    if not item:
-        raise HTTPException(status_code=404, detail="Item not found")
-
-    if item.image_path and os.path.exists(item.image_path):
-        os.remove(item.image_path)
-
-    try:
-        db.delete(item)
-        db.commit()
-    except IntegrityError:
-        db.rollback()
-        raise HTTPException(
-            status_code=400,
-            detail="Item cannot be deleted because it is used in requisitions"
-        )
-
-    return {"status": "deleted"}
 
 @router.delete("/{item_id}/image")
 def delete_item_image(
@@ -190,3 +204,20 @@ def update_item(
     db.commit()
     db.refresh(db_item)
     return db_item
+
+@router.patch("/{item_id}/active")
+def set_item_active(
+    item_id: int,
+    payload: ItemActiveUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(require_captain)
+):
+    item = db.get(Item, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    item.is_active = payload.is_active
+    db.commit()
+    db.refresh(item)
+
+    return item

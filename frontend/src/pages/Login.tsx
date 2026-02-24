@@ -1,5 +1,7 @@
 import { useState } from "react";
 import api from "../api/api";
+import Button from "../components/ui/Button";
+import Input from "../components/ui/Input";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -28,9 +30,9 @@ export default function Login() {
 
   return (
     <form onSubmit={handleSubmit}>
-      <input placeholder="username" onChange={e => setUsername(e.target.value)} />
-      <input type="password" placeholder="password" onChange={e => setPassword(e.target.value)} />
-      <button type="submit">Login</button>
+      <Input placeholder="username" onChange={e => setUsername(e.target.value)} />{" "}
+      <Input type="password" placeholder="password" onChange={e => setPassword(e.target.value)} />{" "}
+      <Button variant= "primary" type="submit">Login</Button>
     </form>
   );
 }
