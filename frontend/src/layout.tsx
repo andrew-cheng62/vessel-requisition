@@ -1,19 +1,41 @@
-import { Link, Outlet } from "react-router-dom";
-
+import { Outlet, useLocation, Link } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
+import Button from "./components/ui/Button";
 
 export default function Layout() {
-  return (
-    <>
-      <nav style={{ padding: 12, borderBottom: "1px solid #ccc" }}>
-        <Link to="/items">Items</Link>{" "}
-        | <Link to="/requisitions">Requisitions</Link>{" "}
-        | <Link to="/Companies">Companies</Link>{" "}
-        | <Link to="/login">Login</Link>
-      </nav>
+  const location = useLocation();
+  const isLoginPage = location.pathname === "/login";
+  const { user, logout } = useAuth();
 
-      <main style={{ padding: 12 }}>
-        <Outlet />
-      </main>
-    </>
+  return (
+    <div className="app-container">
+      {!isLoginPage &&
+        <nav className="flex items-center justify-between px-6 py-3 border-b bg-white shadow-sm">
+  
+          {/* LEFT SIDE */}
+          <div className="flex gap-6">
+            <Link to="/items">Items</Link>
+            <Link to="/requisitions">Requisitions</Link>
+            <Link to="/companies">Companies</Link>
+          </div>
+
+          {/* RIGHT SIDE */}
+          <div className="flex items-center gap-4">
+            {user && (
+              <span className="text-sm text-gray-600">
+                {user.full_name}
+              </span>
+            )}
+
+            <Button variant="ghost" onClick={logout}>
+              Logout
+            </Button>
+          </div>
+        </nav>
+      }
+        <main>
+          <Outlet />
+        </main>
+     </div>
   );
 }
