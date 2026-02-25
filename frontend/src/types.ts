@@ -8,7 +8,7 @@ export type Company = {
   is_supplier?: boolean;
   comments?: string;
   logo_path?: string;
-  is_active: boolean
+  is_active: boolean;
 };
 
 export type CompanyCreate = {
@@ -17,7 +17,6 @@ export type CompanyCreate = {
   is_manufacturer: boolean;
   logo_path?: string;
 };
-
 
 export type Item = {
   id: number;
@@ -29,9 +28,10 @@ export type Item = {
   supplier?: Company;
   category?: Category;
   image_path?: string;
-  created_at: string
-  desc_long?: text;
-  is_active: boolean
+  created_at: string;
+  // FIX: was `text` which is not a valid TypeScript type
+  desc_long?: string;
+  is_active: boolean;
 };
 
 export type ItemCreate = {
@@ -39,14 +39,14 @@ export type ItemCreate = {
   description?: string;
   catalogue_nr?: string;
   manufacturer?: number;
-  unit: string
+  unit: string;
 };
 
 export type RequisitionLine = {
   item_id: number;
   name: string;
   unit: string;
-  quantity: number
+  quantity: number;
 };
 
 export type RequisitionItem = {
@@ -56,8 +56,8 @@ export type RequisitionItem = {
   item: {
     id: number;
     name: string;
-    unit: string
-  }
+    unit: string;
+  };
 };
 
 export type Requisition = {
@@ -66,15 +66,15 @@ export type Requisition = {
   notes: string;
   created_at: string;
   supplier?: Company;
-  items: RequisitionItem[]
-  is_active: boolean
+  items: RequisitionItem[];
+  is_active: boolean;
 };
 
 export type RequisitionEditLine = {
   item_id: number;
   name: string;
   unit: string;
-  quantity: number
+  quantity: number;
 };
 
 export type Supplier = { id: number; name: string };
@@ -83,6 +83,5 @@ export type Manufacturer = { id: number; name: string };
 
 export type Category = { id: number; name: string };
 
-export type CompanyRole = "supplier" | "manufacturer";
-
+// FIX: was declared twice (duplicate type alias causes TS error)
 export type CompanyRole = "supplier" | "manufacturer";

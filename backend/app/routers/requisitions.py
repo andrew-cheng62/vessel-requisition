@@ -50,11 +50,8 @@ def can_receive(req, user):
     )
 
 def can_delete(req, user):
-    # Only captain can delete
     if user.role != "captain":
         return False
-
-    # Allow delete only if draft or cancelled
     return req.status in {"draft", "cancelled"}
 
 router = APIRouter(prefix="/requisitions", tags=["Requisitions"])
@@ -72,12 +69,10 @@ def create_requisition(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    # validate item
     if not data.items:
         raise HTTPException(status_code=400, detail="Requisition must contain at least one item")
 
     try:
-        # Create requisition (header)
         requisition = Requisition(
             supplier_id=data.supplier_id,
             status="draft",
@@ -87,17 +82,16 @@ def create_requisition(
         )
 
         db.add(requisition)
-        db.flush()  # IMPORTANT: get requisition.id without commit
+        db.flush()
 
-        # Create requisition items (rows)
         for row in data.items:
-          ri = RequisitionItem(
-            requisition_id=requisition.id,
-            item_id=row.item_id,
-            quantity=row.quantity,
-            received_qty=0,
-          )
-          db.add(ri)
+            ri = RequisitionItem(
+                requisition_id=requisition.id,
+                item_id=row.item_id,
+                quantity=row.quantity,
+                received_qty=0,
+            )
+            db.add(ri)
 
         db.commit()
         db.refresh(requisition)
@@ -149,7 +143,7 @@ def list_requisitions(
     }
 
 
-@router.post("/{req_id}/status", response_model=RequisitionOut) # only Captain can change status, crew can only receive
+@router.post("/{req_id}/status", response_model=RequisitionOut)
 def change_status(
     req_id: int,
     data: dict,
@@ -275,11 +269,9 @@ def edit_requisition(
         req.notes = data.notes
 
     if data.items is not None:
-        # remove old items
         req.items.clear()
         db.flush()
 
-        # add new items
         for row in data.items:
             req.items.append(
                 RequisitionItem(
@@ -346,12 +338,42 @@ def add_item_to_requisition(
     db.refresh(req)
     return req
 
-@router.get("/{req_id}/export")
-def export_requisition(req_id: int, db=Depends(get_db)):
+
+# FIX: Added missing DELETE endpoint
+@router.delete("/{req_id}")
+def delete_requisition(
+    req_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
     req = db.query(Requisition).filter(Requisition.id == req_id).first()
 
     if not req:
-        return {"detail": "Not found"}
+        raise HTTPException(404, "Requisition not found")
+
+    if not can_delete(req, current_user):
+        raise HTTPException(403, "Only captain can delete draft or cancelled requisitions")
+
+    db.delete(req)
+    db.commit()
+
+    return {"status": "deleted"}
+
+
+@router.get("/{req_id}/export")
+def export_requisition(req_id: int, db=Depends(get_db)):
+    req = (
+        db.query(Requisition)
+        .options(
+            joinedload(Requisition.supplier),
+            joinedload(Requisition.items).joinedload(RequisitionItem.item),
+        )
+        .filter(Requisition.id == req_id)
+        .first()
+    )
+
+    if not req:
+        raise HTTPException(404, "Requisition not found")
 
     wb = Workbook()
     ws = wb.active
@@ -360,7 +382,6 @@ def export_requisition(req_id: int, db=Depends(get_db)):
     thin = Side(border_style="thin")
     border = Border(left=thin, right=thin, top=thin, bottom=thin)
 
-    # ===== HEADER INFO =====
     ws["B1"] = "Requisition ID"
     ws["C1"] = req.id
 
@@ -373,7 +394,6 @@ def export_requisition(req_id: int, db=Depends(get_db)):
     ws["B4"] = "Created"
     ws["C4"] = req.created_at.strftime("%d-%m-%Y")
 
-    # ===== TABLE HEADER =====
     ws.append([])
     ws.append(["Nr", "Item", "Unit", "Qty", "Received", "Description"])
     center = Alignment(horizontal="center")
@@ -383,14 +403,15 @@ def export_requisition(req_id: int, db=Depends(get_db)):
         cell.font = Font(bold=True)
         cell.alignment = center
 
-    for idx, item in enumerate(req.items, start=1):
+    for idx, line in enumerate(req.items, start=1):
+        # FIX: was item.item.description — correct field is desc_short
         ws.append([
             idx,
-            item.item.name,
-            item.item.unit,
-            item.quantity,
-            item.received_qty,
-            item.item.description or ""
+            line.item.name,
+            line.item.unit,
+            line.quantity,
+            line.received_qty,
+            line.item.desc_short or "",
         ])
 
     for row in ws.iter_rows(min_row=6):
@@ -398,20 +419,19 @@ def export_requisition(req_id: int, db=Depends(get_db)):
             cell.border = border
             cell.alignment = Alignment(vertical='center')
 
-    ws.column_dimensions["A"].width = 6   # #
+    ws.column_dimensions["A"].width = 6
     for cell in ws["A"]:
         cell.alignment = center
-    ws.column_dimensions["C"].width = 12  # Unit
+    ws.column_dimensions["C"].width = 12
     for cell in ws["C"]:
         cell.alignment = center
-    ws.column_dimensions["D"].width = 12  # Quantity
+    ws.column_dimensions["D"].width = 12
     for cell in ws["D"]:
         cell.alignment = center
-    ws.column_dimensions["E"].width = 12  # Received
+    ws.column_dimensions["E"].width = 12
     for cell in ws["E"]:
         cell.alignment = center
 
-    # Auto column width
     for col in ws.columns:
         max_length = 0
         column = col[0].column_letter

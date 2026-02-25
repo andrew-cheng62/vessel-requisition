@@ -15,44 +15,74 @@ api.interceptors.request.use((config) => {
 
 export default api;
 
-export const createItem = async (data: ItemCreate) => {
-  return api.post("/items/", data);
+// ── Items ────────────────────────────────────────────────────────────────────
+
+export type ItemFilter = {
+  search?: string;
+  category_id?: number;
+  manufacturer_id?: number;
+  supplier_id?: number;
+  page?: number;
+  page_size?: number;
+  is_active?: boolean;
 };
 
-export const fetchItems = async (): Promise<Item[]> => {
-  const res = await api.get("/items/");
+export type PaginatedItems = {
+  items: Item[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+};
+
+// FIX: was returning res.data directly (Item[]), but /items returns a paginated object
+export const fetchItems = async (filter?: ItemFilter): Promise<PaginatedItems> => {
+  const res = await api.get("/items/", { params: filter });
   return res.data;
 };
+
+// ── Companies ────────────────────────────────────────────────────────────────
 
 export type CompanyFilter = {
   role?: "supplier" | "manufacturer";
   search?: string;
+  page?: number;
+  page_size?: number;
 };
 
+export type PaginatedCompanies = {
+  items: Company[];
+  total: number;
+  page: number;
+  page_size: number;
+  pages: number;
+};
+
+// FIX: was returning res.data directly (Company[]), but /companies returns a paginated object
 export async function fetchCompanies(
   filter?: CompanyFilter
-): Promise<Company[]> {
-  const res = await api.get("/companies", {
-    params: filter,
-  });
+): Promise<PaginatedCompanies> {
+  const res = await api.get("/companies", { params: filter });
   return res.data;
 }
+
+// ── Categories ───────────────────────────────────────────────────────────────
 
 export const fetchCategories = async (): Promise<Category[]> => {
   const res = await api.get("/categories");
   return res.data;
 };
 
+// ── Item helpers ─────────────────────────────────────────────────────────────
+
 export const setItemActive = (id: number, active: boolean) =>
   api.patch(`/items/${id}/active`, { is_active: active });
 
-export const uploadCompanyLogo = async (
-  companyId: number,
-  file: File
-) => {
+// ── Company logo helpers ──────────────────────────────────────────────────────
+
+export const uploadCompanyLogo = async (companyId: number, file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-
   return api.post(`/companies/${companyId}/logo`, formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });

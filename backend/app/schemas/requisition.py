@@ -14,12 +14,14 @@ class RequisitionBase(BaseModel):
 class RequisitionCreate(RequisitionBase):
     items: List[RequisitionItemCreate]
 
+# FIX: status was typed as Optional[list[RequisitionItemCreate]] — nonsensical.
+# Removed it from update schema (status is changed via the dedicated /status endpoint).
+# items and is_active made Optional so partial updates work correctly.
 class RequisitionUpdate(BaseModel):
     supplier_id: Optional[int] = None
-    status: Optional[list[RequisitionItemCreate]] = None
     notes: Optional[str] = None
-    items: List[RequisitionItemCreate]
-    is_active: bool
+    items: Optional[List[RequisitionItemCreate]] = None
+    is_active: Optional[bool] = None
 
 class RequisitionOut(BaseModel):
     id: int

@@ -15,15 +15,18 @@ export function FormField({
   label,
   children,
 }: {
-  label: string
-  children: React.ReactNode
+  // FIX: label was required but used without it in several places (e.g. checkbox rows)
+  label?: string;
+  children: React.ReactNode;
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
+      {label && (
+        <label className="block text-sm font-medium text-gray-700 mb-1">
+          {label}
+        </label>
+      )}
       {children}
     </div>
-  )
+  );
 }

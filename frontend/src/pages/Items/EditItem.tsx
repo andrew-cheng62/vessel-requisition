@@ -16,10 +16,10 @@ export default function EditItem() {
   const navigate = useNavigate();
 
   const [item, setItem] = useState<Item | null>(null);
-  const [companies, setCompanies] = useState<Company[]>([]);
   const [name, setName] = useState("");
-  const [descShort, setDescshort] = useState("");
-  const [descLong, setDesclong] = useState("");
+  // FIX: renamed to match the actual setter names used in JSX (was setDescShort/setDescLong)
+  const [descShort, setDescShort] = useState("");
+  const [descLong, setDescLong] = useState("");
   const [catalogueNr, setCatalogueNr] = useState("");
   const [unit, setUnit] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
@@ -30,13 +30,14 @@ export default function EditItem() {
   const [suppliers, setSuppliers] = useState<Company[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [imageDeleted, setImageDeleted] = useState(false);
-  const [isActive, setIsactive] = useState(true);
+  const [isActive, setIsActive] = useState(true);
 
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   /* LOAD COMPANIES AND CATEGORIES */
   useEffect(() => {
+    // FIX: fetchCompanies now returns PaginatedCompanies, so we use .items
     fetchCompanies({ role: "manufacturer" }).then(res => setManufacturers(res.items));
     fetchCompanies({ role: "supplier" }).then(res => setSuppliers(res.items));
     fetchCategories().then(setCategories);
@@ -48,14 +49,14 @@ export default function EditItem() {
       const data = res.data;
       setItem(data);
       setName(data.name);
-      setDescshort(data.desc_short || "");
-      setDesclong(data.desc_long || "");
+      setDescShort(data.desc_short || "");
+      setDescLong(data.desc_long || "");
       setCatalogueNr(data.catalogue_nr || "");
       setUnit(data.unit);
       setCategoryId(data.category?.id ?? "");
       setManufacturerId(data.manufacturer?.id ?? "");
       setSupplierId(data.supplier?.id ?? "");
-      setIsactive(data.is_active)
+      setIsActive(data.is_active);
     });
   }, [id]);
 
@@ -75,7 +76,7 @@ export default function EditItem() {
         category_id: categoryId || undefined,
         manufacturer_id: manufacturerId || undefined,
         supplier_id: supplierId || undefined,
-        is_active: isActive
+        is_active: isActive,
       });
 
       if (file) {
@@ -94,132 +95,111 @@ export default function EditItem() {
   /* DELETE IMAGE */
   const deleteImage = async () => {
     if (!confirm("Delete item image?")) return;
-
     await api.delete(`/items/${id}/image`);
-
     setItem(prev => prev ? { ...prev, image_path: null } : prev);
     setImageDeleted(true);
     toast.success("Image deleted successfully");
-};
-
+  };
 
   if (!item) return <p>Loading...</p>;
 
   return (
     <PageContainer title="Edit Item">
-
       <FormLayout onSubmit={handleSave}>
 
-      {message && <p style={{ color: "green" }}>{message}</p>}
-      {error && <p style={{ color: "red" }}>{error}</p>}
+        {message && <p style={{ color: "green" }}>{message}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
 
-        <FormField label="Edit Category">
+        <FormField label="Category">
           <Select
             value={categoryId}
             onChange={e => setCategoryId(e.target.value ? Number(e.target.value) : "")}
           >
             <option value="">Select category</option>
             {categories.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
+              <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </Select>
         </FormField>
 
-        <FormField label="Edit Name">
+        <FormField label="Name">
           <Input value={name} onChange={e => setName(e.target.value)} required />
         </FormField>
 
-        <FormField label="Edit short description">
+        <FormField label="Short description">
+          {/* FIX: was calling setDescshort (lowercase s) which didn't exist */}
           <Input value={descShort} onChange={e => setDescShort(e.target.value)} />
         </FormField>
 
-        <FormField label="Edit full description">
+        <FormField label="Full description">
+          {/* FIX: was calling setDesclong (lowercase l) which didn't exist */}
           <Input value={descLong} onChange={e => setDescLong(e.target.value)} />
         </FormField>
 
-        <FormField label="Edit Catalog Nr">
+        <FormField label="Catalogue Nr">
           <Input value={catalogueNr} onChange={e => setCatalogueNr(e.target.value)} />
         </FormField>
 
-        <FormField label="Edit Unit">
+        <FormField label="Unit">
           <Input value={unit} onChange={e => setUnit(e.target.value)} required />
         </FormField>
 
         <div className="grid grid-cols-2 gap-4">
-        <FormField label="Edit Manufacturer">
-          <Select
-            value={manufacturerId}
-            onChange={e => setManufacturerId(e.target.value ? Number(e.target.value) : "")}
-          >
-            <option value="">Select manufacturer</option>
-            {manufacturers.map(m => (
-              <option key={m.id} value={m.id}>{m.name}
-            </option>
-            ))}
-          </Select>
-        </FormField>
+          <FormField label="Manufacturer">
+            <Select
+              value={manufacturerId}
+              onChange={e => setManufacturerId(e.target.value ? Number(e.target.value) : "")}
+            >
+              <option value="">Select manufacturer</option>
+              {manufacturers.map(m => (
+                <option key={m.id} value={m.id}>{m.name}</option>
+              ))}
+            </Select>
+          </FormField>
 
-        <FormField label="Edit Supplier">
-          <Select
-            value={supplierId}
-            onChange={e =>
-              setSupplierId(e.target.value ? Number(e.target.value) : "")
-            }
-          >
-            <option value="">Select supplier</option>
-            {suppliers.map(s => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-            </option>
-            ))}
-          </Select>
-        </FormField>
+          <FormField label="Supplier">
+            <Select
+              value={supplierId}
+              onChange={e => setSupplierId(e.target.value ? Number(e.target.value) : "")}
+            >
+              <option value="">Select supplier</option>
+              {suppliers.map(s => (
+                <option key={s.id} value={s.id}>{s.name}</option>
+              ))}
+            </Select>
+          </FormField>
         </div>
 
-      {/* IMAGE PREVIEW */}
-      {item.image_path && !imageDeleted && (
-        <div>
-          <img
-            src={`http://localhost:8000/${item.image_path}`}
-            className="w-40 mb-2 rounded"
-          />
-          <Button
-            variant="delete"
-            type="button"
-            onClick={deleteImage}
-          >
-            Delete image
+        {/* IMAGE PREVIEW */}
+        {item.image_path && !imageDeleted && (
+          <div>
+            <img
+              src={`http://localhost:8000/${item.image_path}`}
+              className="w-40 mb-2 rounded"
+            />
+            <Button variant="delete" type="button" onClick={deleteImage}>
+              Delete image
+            </Button>
+          </div>
+        )}
+
+        <div className="form-actions space-y-6">
+          {(!item.image_path || imageDeleted) && (
+            <ImageUpload
+              file={file}
+              onChange={setFile}
+              disabled={!!item.image_path && !imageDeleted}
+            />
+          )}
+
+          <Button variant="ghost" type="submit">Save</Button>{" "}
+
+          <Button variant="delete" type="button" onClick={() => navigate(-1)}>
+            Cancel
           </Button>
         </div>
-      )}
 
-      <div className="form-actions space-y-6">
-
-      {(!item.image_path || imageDeleted) && (
-        <ImageUpload
-          file={file}
-          onChange={setFile}
-          disabled={!!item.image_path && !imageDeleted}
-        />
-      )}
-
-        <Button variant="ghost" type="submit">
-          Save
-        </Button>{" "}
-
-        <Button
-          variant="delete"
-          type="button"
-          onClick={() => navigate(-1)}
-        >
-          Cancel
-        </Button>
-
-      </div>
-
-    </FormLayout>
+      </FormLayout>
     </PageContainer>
   );
 }
