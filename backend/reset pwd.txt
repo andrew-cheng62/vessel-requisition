@@ -1,0 +1,8 @@
+user = db.query(User).filter(
+    User.username == "admin",
+    User.vessel_id == None
+).first()
+
+user.password_hash = hash_password("newpassword")
+db.commit()
+print("Password reset")

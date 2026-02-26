@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from app.models.requisition_item import RequisitionItem
 
+
 class Requisition(Base):
     __tablename__ = "requisitions"
 
@@ -20,6 +21,10 @@ class Requisition(Base):
     notes = Column(String, nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
 
+    # Tenant scope — requisitions belong to a vessel
+    vessel_id = Column(Integer, ForeignKey("vessels.id", ondelete="CASCADE"), nullable=False)
+
+    vessel = relationship("Vessel", back_populates="requisitions")
     items = relationship(
         "RequisitionItem",
         back_populates="requisition",

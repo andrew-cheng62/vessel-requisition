@@ -8,19 +8,35 @@ import { Toaster } from "react-hot-toast";
 import Layout from "./Layout";
 import ProtectedLayout from "./components/ProtectedLayout";
 import RoleRoute from "./components/RoleRoute";
+
+// Auth
+import Login from "./pages/Auth/Login";
+import RegisterVessel from "./pages/Auth/RegisterVessel";
+
+// Items
 import Items from "./pages/Items/Items";
 import CreateItem from "./pages/Items/CreateItem";
-import Login from "./pages/Login";
 import ItemDetails from "./pages/Items/ItemDetails";
 import EditItem from "./pages/Items/EditItem";
+
+// Requisitions
+import RequisitionsList from "./pages/Requisitions/RequisitionsList";
 import CreateRequisition from "./pages/Requisitions/CreateRequisition";
+import RequisitionDetails from "./pages/Requisitions/RequisitionDetails";
+import EditRequisition from "./pages/Requisitions/EditRequisition";
+
+// Companies
 import Companies from "./pages/Companies/Companies";
 import CompanyDetails from "./pages/Companies/CompanyDetails";
 import CreateCompany from "./pages/Companies/CreateCompany";
 import EditCompany from "./pages/Companies/EditCompany";
-import RequisitionDetails from "./pages/Requisitions/RequisitionDetails";
-import EditRequisition from "./pages/Requisitions/EditRequisition";
-import RequisitionsList from "./pages/Requisitions/RequisitionsList";
+
+// Vessel
+import CrewManagement from "./pages/Vessels/CrewManagement";
+import VesselSettings from "./pages/Vessels/VesselSettings";
+
+// Admin
+import AdminVessels from "./pages/Admin/AdminVessels";
 
 const router = createBrowserRouter([
   {
@@ -30,10 +46,11 @@ const router = createBrowserRouter([
       </AuthProvider>
     ),
     children: [
-      // 🔓 PUBLIC ROUTE
+      // Public
       { path: "/login", element: <Login /> },
+      { path: "/register", element: <RegisterVessel /> },
 
-      // 🔒 PROTECTED ROUTES
+      // Protected (any authenticated user)
       {
         element: <ProtectedLayout />,
         children: [
@@ -45,7 +62,7 @@ const router = createBrowserRouter([
           { path: "/items/:id", element: <ItemDetails /> },
           { path: "/items/:id/edit", element: <EditItem /> },
 
-          // Companies
+          // Companies (shared, readable by all)
           { path: "/companies", element: <Companies /> },
           { path: "/companies/new", element: <CreateCompany /> },
           { path: "/companies/:id", element: <CompanyDetails /> },
@@ -56,7 +73,34 @@ const router = createBrowserRouter([
           { path: "/requisitions/new", element: <CreateRequisition /> },
           { path: "/requisitions/:id", element: <RequisitionDetails /> },
           { path: "/requisitions/:id/edit", element: <EditRequisition /> },
-          { path: "/requisitions/:id/export", element: <RequisitionDetails /> },
+
+          // Captain-only vessel management
+          {
+            path: "/crew",
+            element: (
+              <RoleRoute role="captain">
+                <CrewManagement />
+              </RoleRoute>
+            ),
+          },
+          {
+            path: "/vessel/settings",
+            element: (
+              <RoleRoute role="captain">
+                <VesselSettings />
+              </RoleRoute>
+            ),
+          },
+
+          // Super admin
+          {
+            path: "/admin/vessels",
+            element: (
+              <RoleRoute role="super_admin">
+                <AdminVessels />
+              </RoleRoute>
+            ),
+          },
         ],
       },
     ],

@@ -1,3 +1,26 @@
+export type Vessel = {
+  id: number;
+  name: string;
+  imo_number?: string;
+  flag?: string;
+  vessel_type?: string;
+  is_active: boolean;
+  created_at: string;
+  user_count?: number;
+  item_count?: number;
+  requisition_count?: number;
+};
+
+export type User = {
+  id: string;
+  username: string;
+  full_name?: string;
+  role: "super_admin" | "captain" | "crew";
+  is_active: boolean;
+  vessel_id?: number;
+  created_at?: string;
+};
+
 export type Company = {
   id: number;
   name: string;
@@ -29,9 +52,9 @@ export type Item = {
   category?: Category;
   image_path?: string;
   created_at: string;
-  // FIX: was `text` which is not a valid TypeScript type
   desc_long?: string;
-  is_active: boolean;
+  is_active: boolean;       // global (super_admin controls)
+  vessel_active?: boolean;  // vessel-level (captain controls)
 };
 
 export type ItemCreate = {
@@ -53,11 +76,7 @@ export type RequisitionItem = {
   id: number;
   quantity: number;
   received_qty: number;
-  item: {
-    id: number;
-    name: string;
-    unit: string;
-  };
+  item: { id: number; name: string; unit: string };
 };
 
 export type Requisition = {
@@ -78,10 +97,6 @@ export type RequisitionEditLine = {
 };
 
 export type Supplier = { id: number; name: string };
-
 export type Manufacturer = { id: number; name: string };
-
 export type Category = { id: number; name: string };
-
-// FIX: was declared twice (duplicate type alias causes TS error)
 export type CompanyRole = "supplier" | "manufacturer";

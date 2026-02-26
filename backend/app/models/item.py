@@ -4,10 +4,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from app.db.base_class import Base
 from typing import TYPE_CHECKING
-from app.models.category import Category
 
 if TYPE_CHECKING:
     from app.models.requisition_item import RequisitionItem
+    from app.models.vessel_item import VesselItem
+
 
 class Item(Base):
     __tablename__ = "items"
@@ -24,10 +25,12 @@ class Item(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     category_id = Column(Integer, ForeignKey("categories.id", ondelete="RESTRICT"), nullable=False)
     desc_long = Column(Text, nullable=True)
+
+    # Global active flag — only super_admin can toggle this
     is_active = Column(Boolean, default=True, nullable=False)
 
     category = relationship("Category")
     manufacturer = relationship("Company", foreign_keys=[manufacturer_id])
     supplier = relationship("Company", foreign_keys=[supplier_id])
     requisition_items = relationship("RequisitionItem", back_populates="item", cascade="all, delete-orphan")
-
+    vessel_overrides = relationship("VesselItem", back_populates="item", cascade="all, delete-orphan")
