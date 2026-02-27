@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import companies, items, auth, requisitions, categories, vessels, users
+
+from app.routers import companies, items, auth, requisitions, categories, vessels, users, tags
 import app.models
 
-app = FastAPI(title="Vessel Requisitions", version="2.0.0")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,10 +22,10 @@ app.include_router(companies.router)
 app.include_router(items.router)
 app.include_router(requisitions.router)
 app.include_router(categories.router)
+app.include_router(tags.router)
 
 app.mount("/media", StaticFiles(directory="media"), name="media")
 
-
 @app.get("/")
 def health():
-    return {"status": "ok", "version": "2.0.0"}
+    return {"status": "ok"}

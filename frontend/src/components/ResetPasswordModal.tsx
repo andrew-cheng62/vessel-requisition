@@ -4,7 +4,7 @@ import type { User } from "../types";
 import toast from "react-hot-toast";
 import Button from "./ui/Button";
 import Input from "./ui/Input";
-import styles from "../styles/Modal.module.css";
+import Modal from "./Modal";
 
 type Props = {
   user: User;
@@ -18,6 +18,7 @@ export default function ResetPasswordModal({ user, onClose }: Props) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     if (newPassword.length < 8) {
       toast.error("Password must be at least 8 characters");
       return;
@@ -41,51 +42,48 @@ export default function ResetPasswordModal({ user, onClose }: Props) {
   };
 
   return (
-    <div className={styles.backdrop}>
-      <div className={styles.modal}>
-        <div className={styles.title}>Reset Password</div>
+    <Modal title="Reset Password" onClose={onClose}>
+      <p className="text-sm text-gray-500 mb-4">
+        Setting new password for{" "}
+        <strong className="text-gray-800">{user.full_name || user.username}</strong>.
+        They will need to use this password on next login.
+      </p>
 
-        <p className="text-sm text-gray-500 mb-4">
-          Setting new password for <strong>{user.full_name || user.username}</strong>.
-          They will need to use this password on next login.
-        </p>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            New Password
+          </label>
+          <Input
+            type="password"
+            value={newPassword}
+            onChange={e => setNewPassword(e.target.value)}
+            autoFocus
+            required
+          />
+        </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              New Password
-            </label>
-            <Input
-              type="password"
-              value={newPassword}
-              onChange={e => setNewPassword(e.target.value)}
-              autoFocus
-              required
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Confirm Password
+          </label>
+          <Input
+            type="password"
+            value={confirm}
+            onChange={e => setConfirm(e.target.value)}
+            required
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirm Password
-            </label>
-            <Input
-              type="password"
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className={styles.actions}>
-            <Button variant="ghost" type="button" onClick={onClose} disabled={loading}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? "Saving..." : "Reset Password"}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="flex justify-end gap-3 pt-2">
+          <Button type="button" variant="ghost" onClick={onClose} disabled={loading}>
+            Cancel
+          </Button>
+          <Button type="submit" variant="primary" disabled={loading}>
+            {loading ? "Saving..." : "Reset Password"}
+          </Button>
+        </div>
+      </form>
+    </Modal>
   );
 }

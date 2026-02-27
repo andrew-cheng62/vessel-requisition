@@ -61,7 +61,7 @@ From backend/: (venv)
 
 alembic revision --autogenerate
 or
-python -m alembic revision -m "vessel_item table, username unique per vessel, remove vessel_id from items"
+python -m alembic revision -m "Add tags table and item_tags join table"
 or
 alembic revision -m "add email column to vessels"
 

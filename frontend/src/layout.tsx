@@ -38,6 +38,7 @@ export default function Layout() {
                 <NavLink to="/items" className={({ isActive }) => isActive ? activeCls : navCls}>Items</NavLink>
                 <NavLink to="/companies" className={({ isActive }) => isActive ? activeCls : navCls}>Companies</NavLink>
                 <NavLink to="/requisitions" className={({ isActive }) => isActive ? activeCls : navCls}>Requisitions</NavLink>
+                <NavLink to="/admin/tags" className={({ isActive }) => isActive ? activeCls : navCls}>Tags</NavLink>
               </>
             )}
 
@@ -60,6 +61,7 @@ export default function Layout() {
           <div className="flex items-center gap-4">
             {user && (
               <button
+                type="button"
                 onClick={() => setShowChangePassword(true)}
                 className="text-right hover:opacity-75 transition-opacity cursor-pointer"
                 title="Click to change password"

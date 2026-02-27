@@ -42,10 +42,16 @@ def change_own_password(
     """Any user can change their own password — must provide old password."""
     if len(data.new_password) < 8:
         raise HTTPException(400, "Password must be at least 8 characters")
-    if not verify_password(data.old_password, current_user.password_hash):
+
+    # Re-fetch user in this session so the update is tracked and committed correctly
+    user = db.get(User, current_user.id)
+    if not user:
+        raise HTTPException(404, "User not found")
+
+    if not verify_password(data.old_password, user.password_hash):
         raise HTTPException(400, "Current password is incorrect")
 
-    current_user.password_hash = hash_password(data.new_password)
+    user.password_hash = hash_password(data.new_password)
     db.commit()
     return {"status": "password changed"}
 

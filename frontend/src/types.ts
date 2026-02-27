@@ -3,8 +3,8 @@ export type Vessel = {
   name: string;
   imo_number?: string;
   flag?: string;
-  email?: string;
   vessel_type?: string;
+  email?: string;
   is_active: boolean;
   created_at: string;
   user_count?: number;
@@ -20,6 +20,13 @@ export type User = {
   is_active: boolean;
   vessel_id?: number;
   created_at?: string;
+};
+
+export type Tag = {
+  id: number;
+  name: string;
+  slug: string;
+  color: string;
 };
 
 export type Company = {
@@ -54,8 +61,9 @@ export type Item = {
   image_path?: string;
   created_at: string;
   desc_long?: string;
-  is_active: boolean;       // global (super_admin controls)
-  vessel_active?: boolean;  // vessel-level (captain controls)
+  is_active: boolean;
+  vessel_active?: boolean;
+  tags: Tag[];
 };
 
 export type ItemCreate = {

@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from app.schemas.company import CompanyOut
 from app.schemas.category import CategoryOut
+from app.schemas.tag import TagOut
 
 
 class ItemOut(BaseModel):
@@ -10,13 +11,14 @@ class ItemOut(BaseModel):
     desc_short: Optional[str] = None
     catalogue_nr: Optional[str] = None
     unit: str
-    is_active: bool                        # global active (super_admin level)
-    vessel_active: Optional[bool] = True   # vessel-level active
+    is_active: bool
+    vessel_active: Optional[bool] = True
     image_path: Optional[str] = None
     manufacturer: Optional[CompanyOut] = None
     supplier: Optional[CompanyOut] = None
     category: CategoryOut
     desc_long: Optional[str] = None
+    tags: List[TagOut] = []
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -45,6 +47,7 @@ class ItemUpdate(BaseModel):
     supplier_id: Optional[int] = None
     category_id: Optional[int] = None
     desc_long: Optional[str] = None
+    tag_ids: Optional[List[int]] = None
 
 
 class ItemCreate(BaseModel):
@@ -57,6 +60,7 @@ class ItemCreate(BaseModel):
     category_id: int
     desc_long: Optional[str] = None
     is_active: bool = True
+    tag_ids: Optional[List[int]] = None
 
 
 class ItemActiveUpdate(BaseModel):

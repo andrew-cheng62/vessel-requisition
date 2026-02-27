@@ -61,7 +61,6 @@ export const setItemActive = (id: number, active: boolean) =>
 export type VesselRegisterData = {
   name: string;
   imo_number?: string;
-  email?: string;
   flag?: string;
   vessel_type?: string;
   captain_username: string;
@@ -123,4 +122,26 @@ export const uploadCompanyLogo = async (companyId: number, file: File) => {
 
 export const deleteCompanyLogo = async (companyId: number) => {
   return api.delete(`/companies/${companyId}/logo`);
+};
+
+// ── Tags ──────────────────────────────────────────────────────────────────────
+import type { Tag } from "../types";
+
+export const fetchTags = async (): Promise<Tag[]> => {
+  const res = await api.get("/tags");
+  return res.data;
+};
+
+export const createTag = async (data: { name: string; color: string }): Promise<Tag> => {
+  const res = await api.post("/tags", data);
+  return res.data;
+};
+
+export const updateTag = async (id: number, data: { name?: string; color?: string }): Promise<Tag> => {
+  const res = await api.put(`/tags/${id}`, data);
+  return res.data;
+};
+
+export const deleteTag = async (id: number): Promise<void> => {
+  await api.delete(`/tags/${id}`);
 };
