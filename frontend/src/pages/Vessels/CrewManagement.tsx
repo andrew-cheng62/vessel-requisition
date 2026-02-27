@@ -6,6 +6,7 @@ import PageContainer from "../../components/layout/PageContainer";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Table from "../../components/ui/Table";
+import ResetPasswordModal from "../../components/ResetPasswordModal";
 import toast from "react-hot-toast";
 
 type CrewForm = {
@@ -24,6 +25,7 @@ export default function CrewManagement() {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<CrewForm>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
+  const [resetTarget, setResetTarget] = useState<User | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -106,7 +108,6 @@ export default function CrewManagement() {
           className="mb-6 p-5 border border-gray-200 rounded-xl bg-gray-50 space-y-4"
         >
           <h3 className="font-semibold text-gray-800">New Crew Member</h3>
-
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
@@ -117,7 +118,9 @@ export default function CrewManagement() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username <span className="text-red-500">*</span>
+              </label>
               <Input
                 placeholder="Login username"
                 value={form.username}
@@ -126,7 +129,9 @@ export default function CrewManagement() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password <span className="text-red-500">*</span>
+              </label>
               <Input
                 type="password"
                 placeholder="Min 8 characters"
@@ -147,7 +152,6 @@ export default function CrewManagement() {
               </select>
             </div>
           </div>
-
           <div className="flex gap-3">
             <Button type="submit" variant="primary" disabled={submitting}>
               {submitting ? "Adding..." : "Add Member"}
@@ -188,7 +192,12 @@ export default function CrewManagement() {
                     {u.is_active ? "Active" : "Inactive"}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-3 text-right space-x-2">
+                  {/* Reset password — available for all crew including self */}
+                  <Button variant="ghost" onClick={() => setResetTarget(u)}>
+                    🔑 Reset password
+                  </Button>
+
                   {u.id !== me?.sub && (
                     u.is_active ? (
                       <Button variant="delete" onClick={() => handleDeactivate(u)}>
@@ -209,6 +218,13 @@ export default function CrewManagement() {
 
       {!loading && crew.length === 0 && (
         <p className="text-gray-500 text-sm mt-4">No crew members yet.</p>
+      )}
+
+      {resetTarget && (
+        <ResetPasswordModal
+          user={resetTarget}
+          onClose={() => setResetTarget(null)}
+        />
       )}
     </PageContainer>
   );

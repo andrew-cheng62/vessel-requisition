@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { Outlet, useLocation, Link, NavLink } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Button from "./components/ui/Button";
+import ChangePasswordModal from "./components/ChangePasswordModal";
 
 export default function Layout() {
   const location = useLocation();
   const isAuthPage = ["/login", "/register"].includes(location.pathname);
   const { user, vesselName, logout, isCaptain, isSuperAdmin } = useAuth();
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   if (isAuthPage) return <div><main><Outlet /></main></div>;
 
@@ -53,13 +56,17 @@ export default function Layout() {
             )}
           </div>
 
-          {/* RIGHT — user info + sign out */}
+          {/* RIGHT — user info + change password + sign out */}
           <div className="flex items-center gap-4">
             {user && (
-              <div className="text-right">
+              <button
+                onClick={() => setShowChangePassword(true)}
+                className="text-right hover:opacity-75 transition-opacity cursor-pointer"
+                title="Click to change password"
+              >
                 <div className="text-sm font-medium text-gray-800">{user.full_name}</div>
                 <div className="text-xs text-gray-400 capitalize">{user.role.replace("_", " ")}</div>
-              </div>
+              </button>
             )}
             <Button variant="ghost" onClick={logout} className="text-sm">
               Sign out
@@ -69,12 +76,13 @@ export default function Layout() {
         </div>
       </nav>
 
-      {/* VESSEL CONTEXT BAR — subtle strip below navbar */}
+      {/* VESSEL CONTEXT BAR */}
       {(vesselName || isSuperAdmin) && (
-        <div className="bg-sky-600 text-white">
+        <div className="bg-slate-700 text-white">
           <div className="max-w-7xl mx-auto px-6 h-8 flex items-center gap-2">
             {vesselName && (
               <>
+                <span className="text-slate-400 text-xs">🚢</span>
                 <span className="text-xs font-semibold tracking-widest uppercase text-slate-200">
                   {vesselName}
                 </span>
@@ -93,6 +101,10 @@ export default function Layout() {
       )}
 
       <main><Outlet /></main>
+
+      {showChangePassword && (
+        <ChangePasswordModal onClose={() => setShowChangePassword(false)} />
+      )}
     </div>
   );
 }
