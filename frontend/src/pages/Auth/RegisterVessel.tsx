@@ -13,6 +13,7 @@ export default function RegisterVessel() {
   // Vessel fields
   const [vesselName, setVesselName] = useState("");
   const [imoNumber, setImoNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [flag, setFlag] = useState("");
   const [vesselType, setVesselType] = useState("");
 
@@ -42,6 +43,7 @@ export default function RegisterVessel() {
       await registerVessel({
         name: vesselName,
         imo_number: imoNumber || undefined,
+        email: email || undefined,
         flag: flag || undefined,
         vessel_type: vesselType || undefined,
         captain_username: username,
@@ -119,6 +121,17 @@ export default function RegisterVessel() {
                   placeholder="e.g. 9876543"
                   value={imoNumber}
                   onChange={e => setImoNumber(e.target.value)}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Vessel e-mail <span className="text-gray-400 font-normal">(optional)</span>
+                </label>
+                <Input
+                  placeholder="e.g. f.drake@pirates.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
                 />
               </div>
 

@@ -34,6 +34,7 @@ def _with_stats(vessel: Vessel, db: Session) -> VesselOutWithStats:
         imo_number=vessel.imo_number,
         flag=vessel.flag,
         vessel_type=vessel.vessel_type,
+        email=vessel.email,
         is_active=vessel.is_active,
         created_at=vessel.created_at,
         user_count=user_count,
@@ -72,6 +73,7 @@ def register_vessel(data: VesselCreate, db: Session = Depends(get_db)):
             imo_number=data.imo_number or None,
             flag=data.flag,
             vessel_type=data.vessel_type,
+            email=data.email,
         )
         db.add(vessel)
         db.flush()

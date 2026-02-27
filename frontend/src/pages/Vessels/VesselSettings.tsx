@@ -18,6 +18,7 @@ export default function VesselSettings() {
   const [imoNumber, setImoNumber] = useState("");
   const [flag, setFlag] = useState("");
   const [vesselType, setVesselType] = useState("");
+  const [email, setEmail] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ export default function VesselSettings() {
       setImoNumber(v.imo_number || "");
       setFlag(v.flag || "");
       setVesselType(v.vessel_type || "");
+      setEmail(v.email || "");
     });
   }, [user?.vessel_id]);
 
@@ -41,6 +43,7 @@ export default function VesselSettings() {
         imo_number: imoNumber || null,
         flag: flag || null,
         vessel_type: vesselType || null,
+        email: email || null,
       });
       toast.success("Vessel settings saved");
     } catch (err: any) {
@@ -80,6 +83,14 @@ export default function VesselSettings() {
               placeholder="e.g. 9876543"
               value={imoNumber}
               onChange={e => setImoNumber(e.target.value)}
+            />
+          </FormField>
+
+          <FormField label="Vessel e-mail">
+            <Input
+              placeholder="e.g. f.drake@pirates.com"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
             />
           </FormField>
 

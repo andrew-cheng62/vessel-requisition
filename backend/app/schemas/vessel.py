@@ -8,6 +8,7 @@ class VesselCreate(BaseModel):
     imo_number: Optional[str] = None
     flag: Optional[str] = None
     vessel_type: Optional[str] = None
+    email: Optional[str] = None
 
     # Captain account to create alongside the vessel
     captain_username: str
@@ -27,6 +28,7 @@ class VesselUpdate(BaseModel):
     imo_number: Optional[str] = None
     flag: Optional[str] = None
     vessel_type: Optional[str] = None
+    email: Optional[str] = None
     is_active: Optional[bool] = None
 
 
@@ -36,6 +38,7 @@ class VesselOut(BaseModel):
     imo_number: Optional[str] = None
     flag: Optional[str] = None
     vessel_type: Optional[str] = None
+    email: Optional[str] = None
     is_active: bool
     created_at: datetime
 

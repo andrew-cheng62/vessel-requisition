@@ -9,20 +9,34 @@ export default function Layout() {
 
   if (isAuthPage) return <div><main><Outlet /></main></div>;
 
-  const navCls = "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors";
-  const activeCls = "text-sm font-medium text-sky-600 border-b-2 border-sky-600 pb-0.5";
+  const navCls = "text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors cursor-pointer";
+  const activeCls = "text-sm font-medium text-sky-600 border-b-2 border-sky-600 pb-0.5 cursor-pointer";
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 h-14 grid grid-cols-3 items-center">
 
-          {/* LEFT — nav links */}
+      {/* NAVBAR */}
+      <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+
+          {/* LEFT — logo + nav links */}
           <div className="flex items-center gap-6">
-            <Link to="/items" className="flex items-center gap-2 font-bold text-slate-800 text-base shrink-0">
+            <Link
+              to={isSuperAdmin ? "/admin/vessels" : "/items"}
+              className="flex items-center gap-2 font-bold text-slate-800 text-base shrink-0 cursor-pointer"
+            >
               <span>⚓</span>
               <span>VesselOps</span>
             </Link>
+
+            {isSuperAdmin && (
+              <>
+                <NavLink to="/admin/vessels" className={({ isActive }) => isActive ? activeCls : navCls}>Vessels</NavLink>
+                <NavLink to="/items" className={({ isActive }) => isActive ? activeCls : navCls}>Items</NavLink>
+                <NavLink to="/companies" className={({ isActive }) => isActive ? activeCls : navCls}>Companies</NavLink>
+                <NavLink to="/requisitions" className={({ isActive }) => isActive ? activeCls : navCls}>Requisitions</NavLink>
+              </>
+            )}
 
             {!isSuperAdmin && (
               <>
@@ -37,33 +51,10 @@ export default function Layout() {
                 )}
               </>
             )}
-
-            {isSuperAdmin && (
-              <NavLink to="/admin/vessels" className={({ isActive }) => isActive ? activeCls : navCls}>
-                Vessels
-              </NavLink>
-            )}
-          </div>
-
-          {/* CENTER — vessel name */}
-          <div className="flex justify-center">
-            {vesselName && (
-              <div className="flex items-center gap-2 px-4 py-1 bg-slate-100 rounded-full">
-                <span className="text-slate-400 text-sm">🚢</span>
-                <span className="text-sm font-semibold text-slate-700 tracking-wide">
-                  {vesselName}
-                </span>
-              </div>
-            )}
-            {isSuperAdmin && (
-              <div className="flex items-center gap-2 px-4 py-1 bg-purple-100 rounded-full">
-                <span className="text-sm font-semibold text-purple-700">⚙ Super Admin</span>
-              </div>
-            )}
           </div>
 
           {/* RIGHT — user info + sign out */}
-          <div className="flex items-center justify-end gap-4">
+          <div className="flex items-center gap-4">
             {user && (
               <div className="text-right">
                 <div className="text-sm font-medium text-gray-800">{user.full_name}</div>
@@ -77,6 +68,29 @@ export default function Layout() {
 
         </div>
       </nav>
+
+      {/* VESSEL CONTEXT BAR — subtle strip below navbar */}
+      {(vesselName || isSuperAdmin) && (
+        <div className="bg-sky-600 text-white">
+          <div className="max-w-7xl mx-auto px-6 h-8 flex items-center gap-2">
+            {vesselName && (
+              <>
+                <span className="text-xs font-semibold tracking-widest uppercase text-slate-200">
+                  {vesselName}
+                </span>
+              </>
+            )}
+            {isSuperAdmin && (
+              <>
+                <span className="text-xs">⚙</span>
+                <span className="text-xs font-semibold tracking-widest uppercase text-purple-300">
+                  Super Admin
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <main><Outlet /></main>
     </div>

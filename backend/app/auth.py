@@ -13,7 +13,9 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 8
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
+
+# This tells Swagger where the login form is
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/form")
 
 
 def get_db():
@@ -33,15 +35,10 @@ def hash_password(plain: str) -> str:
 
 
 def authenticate_user(db: Session, username: str, password: str, vessel_id: int | None):
-    """
-    Look up user by username + vessel_id combination.
-    vessel_id=None is used for super_admin login (no vessel).
-    """
-    q = db.query(User).filter(
+    user = db.query(User).filter(
         User.username == username,
         User.vessel_id == vessel_id,
-    )
-    user = q.first()
+    ).first()
     if not user or not verify_password(password, user.password_hash):
         return None
     if not user.is_active:

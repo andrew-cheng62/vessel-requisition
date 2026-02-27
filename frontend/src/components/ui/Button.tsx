@@ -18,7 +18,7 @@ export default function Button({
         "focus:outline-none focus:ring-2 focus:ring-offset-2",
         {
           primary:
-            "bg-gray-600 text-white hover:bg-gray-700 focus:ring-gray-400 cursor-pointer",
+            "bg-sky-600 text-white hover:bg-sky-700 focus:ring-sky-400 cursor-pointer",
           secondary:
             "bg-yellow-300 text-gray-800 hover:bg-yellow-200 focus:ring-yellow-500 cursor-pointer",
           danger:

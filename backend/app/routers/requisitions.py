@@ -111,11 +111,12 @@ def list_requisitions(
     page_size: int = Query(20, ge=1, le=100),
     status: str | None = None,
     supplier_id: int | None = None,
+    active_only: bool = Query(True),   # ← default True
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
 
-#    CLOSED_STATUSES = ["received", "cancelled"]
+    CLOSED_STATUSES = ["received", "cancelled"]
 
     q = (
         db.query(Requisition)
@@ -128,9 +129,9 @@ def list_requisitions(
 
     if status:
         q = q.filter(Requisition.status == status)
-#    elif active_only:
-        # No explicit status filter + active_only = hide closed
-#        q = q.filter(Requisition.status.notin_(CLOSED_STATUSES))
+    elif active_only:
+        # No explicit status filter + active = hide closed
+        q = q.filter(Requisition.status.notin_(CLOSED_STATUSES))
 
     if supplier_id:
         q = q.filter(Requisition.supplier_id == supplier_id)

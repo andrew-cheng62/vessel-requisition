@@ -66,6 +66,7 @@ export default function AdminVessels() {
             <tr>
               <th className="px-4 py-3 text-left text-sm font-semibold">Vessel</th>
               <th className="px-4 py-3 text-left text-sm font-semibold">IMO</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold">E-mail</th>
               <th className="px-4 py-3 text-left text-sm font-semibold">Type / Flag</th>
               <th className="px-4 py-3 text-center text-sm font-semibold">Users</th>
               <th className="px-4 py-3 text-center text-sm font-semibold">Items</th>
@@ -79,6 +80,7 @@ export default function AdminVessels() {
               <tr key={v.id} className={`border-t border-gray-100 hover:bg-gray-50 ${!v.is_active ? "opacity-50" : ""}`}>
                 <td className="px-4 py-3 font-medium text-gray-900">{v.name}</td>
                 <td className="px-4 py-3 text-gray-500 text-sm">{v.imo_number || "—"}</td>
+                <td className="px-4 py-3 text-gray-500 text-sm">{v.email || "—"}</td>
                 <td className="px-4 py-3 text-gray-600 text-sm">
                   {[v.vessel_type, v.flag].filter(Boolean).join(" · ") || "—"}
                 </td>

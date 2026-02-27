@@ -61,6 +61,7 @@ export const setItemActive = (id: number, active: boolean) =>
 export type VesselRegisterData = {
   name: string;
   imo_number?: string;
+  email?: string;
   flag?: string;
   vessel_type?: string;
   captain_username: string;

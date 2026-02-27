@@ -13,6 +13,7 @@ interface TokenPayload {
 interface AuthContextType {
   user: TokenPayload | null;
   vesselName: string | null;
+  loading: boolean;
   login: (token: string, vesselName?: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<TokenPayload | null>(null);
   const [vesselName, setVesselName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);  // true until we've checked localStorage
   const navigate = useNavigate();
 
   const logout = () => {
@@ -51,7 +53,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const token = localStorage.getItem("token");
     const storedVesselName = localStorage.getItem("vessel_name");
-    if (!token) return;
+    if (!token) {
+      setLoading(false);
+      return;
+    }
     try {
       const decoded = jwtDecode<TokenPayload>(token);
       if (decoded.exp * 1000 < Date.now()) {
@@ -62,6 +67,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     } catch {
       logout();
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -69,6 +76,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider value={{
       user,
       vesselName,
+      loading,
       login,
       logout,
       isAuthenticated: !!user,

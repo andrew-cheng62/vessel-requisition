@@ -12,6 +12,7 @@ class Vessel(Base):
     imo_number = Column(String(20), unique=True, nullable=True)
     flag = Column(String(50), nullable=True)
     vessel_type = Column(String(50), nullable=True)
+    email = Column(String(100), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

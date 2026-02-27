@@ -3,6 +3,7 @@ export type Vessel = {
   name: string;
   imo_number?: string;
   flag?: string;
+  email?: string;
   vessel_type?: string;
   is_active: boolean;
   created_at: string;
