@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api, { fetchCompanies, fetchCategories } from "../../api/api";
+import api, { fetchAllCompanies, fetchCategories } from "../../api/api";
 import type { Item, Company, Category, Tag } from "../../types";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -33,8 +33,8 @@ export default function EditItem() {
   const [imageDeleted, setImageDeleted] = useState(false);
 
   useEffect(() => {
-    fetchCompanies({ role: "manufacturer" }).then(res => setManufacturers(res.items));
-    fetchCompanies({ role: "supplier" }).then(res => setSuppliers(res.items));
+    fetchAllCompanies("manufacturer").then(setManufacturers);
+    fetchAllCompanies("supplier").then(setSuppliers);
     fetchCategories().then(setCategories);
     api.get("/tags").then(res => setAllTags(res.data));
   }, []);

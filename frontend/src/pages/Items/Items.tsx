@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api, { fetchCompanies, fetchItems, setItemActive } from "../../api/api";
+import api, { fetchAllCompanies, fetchItems, setItemActive } from "../../api/api";
 import { useAuth } from "../../context/AuthContext";
 import type { Item, Company, Category, Tag } from "../../types";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
@@ -55,8 +55,8 @@ export default function Items() {
 
   // Load reference data once
   useEffect(() => {
-    fetchCompanies({ role: "supplier" }).then(res => setSuppliers(res.items));
-    fetchCompanies({ role: "manufacturer" }).then(res => setManufacturers(res.items));
+    fetchAllCompanies("supplier").then(setSuppliers);
+    fetchAllCompanies("manufacturer").then(setManufacturers);
     api.get("/categories").then(res => setCategories(res.data));
     api.get("/tags").then(res => setAllTags(res.data));
     api.get("/items/recently-ordered?limit=8").then(res => setRecentItems(res.data));

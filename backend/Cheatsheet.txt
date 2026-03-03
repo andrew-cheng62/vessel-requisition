@@ -1,7 +1,15 @@
 Database user pwd: andrewkikott
-
 super admin: akikott
 pwd: andrewkikott
+MV Cederborg:
+Manager --- 9356567pcjx
+2-Officer --- 9356567pcjx
+MV Nova Cura
+Marcel --- bonniethedog
+
+Default vessel
+captain --- captain123
+crew --- crew4321
 ----------------------------------------
 Virtual Environment activation
 

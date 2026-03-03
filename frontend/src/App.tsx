@@ -14,7 +14,6 @@ import ItemDetails from "./pages/Items/ItemDetails";
 import EditItem from "./pages/Items/EditItem";
 
 import RequisitionsList from "./pages/Requisitions/RequisitionsList";
-import CreateRequisition from "./pages/Requisitions/CreateRequisition";
 import RequisitionDetails from "./pages/Requisitions/RequisitionDetails";
 import EditRequisition from "./pages/Requisitions/EditRequisition";
 
@@ -28,6 +27,7 @@ import VesselSettings from "./pages/Vessels/VesselSettings";
 
 import AdminVessels from "./pages/Admin/AdminVessels";
 import TagManagement from "./pages/Admin/TagManagement";
+import BulkUpload from "./pages/Admin/BulkUpload";
 
 const router = createBrowserRouter([
   {
@@ -56,7 +56,6 @@ const router = createBrowserRouter([
           { path: "/companies/:id/edit", element: <EditCompany /> },
 
           { path: "/requisitions", element: <RequisitionsList /> },
-          { path: "/requisitions/new", element: <CreateRequisition /> },
           { path: "/requisitions/:id", element: <RequisitionDetails /> },
           { path: "/requisitions/:id/edit", element: <EditRequisition /> },
 
@@ -76,6 +75,10 @@ const router = createBrowserRouter([
           {
             path: "/admin/tags",
             element: <RoleRoute role="super_admin"><TagManagement /></RoleRoute>,
+          },
+          {
+            path: "/admin/bulk",
+            element: <RoleRoute role="super_admin"><BulkUpload /></RoleRoute>,
           },
         ],
       },

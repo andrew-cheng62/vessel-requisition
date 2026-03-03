@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import api, { fetchCompanies, fetchItems } from "../../api/api";
-import type { Company, Item, RequisitionLine } from "../../types";
+import api, { fetchAllCompanies } from "../../api/api";
+import type { Company, RequisitionLine } from "../../types";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
 import Select from "../../components/ui/Select";
@@ -15,7 +15,6 @@ export default function EditRequisition() {
   const navigate = useNavigate();
 
   const [companies, setCompanies] = useState<Company[]>([]);
-  const [items, setItems] = useState<Item[]>([]);
   const [supplierId, setSupplierId] = useState<number | "">("");
   const [notes, setNotes] = useState("");
   const [lines, setLines] = useState<RequisitionLine[]>([]);
@@ -26,10 +25,7 @@ export default function EditRequisition() {
 
   /* LOAD DATA */
   useEffect(() => {
-    // FIX: fetchCompanies returns PaginatedCompanies → use .items
-    fetchCompanies().then(res => setCompanies(res.items));
-    // FIX: fetchItems returns PaginatedItems → use .items
-    fetchItems().then(res => setItems(res.items));
+    fetchAllCompanies().then(setCompanies);
 
     api.get(`/requisitions/${id}`).then(res => {
       const r = res.data;

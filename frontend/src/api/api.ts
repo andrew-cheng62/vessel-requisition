@@ -47,6 +47,12 @@ export const fetchCompanies = async (filter?: CompanyFilter): Promise<Paginated<
   return res.data;
 };
 
+/** Unpaginated list for dropdowns — hits GET /companies/all */
+export const fetchAllCompanies = async (role?: CompanyRole): Promise<Company[]> => {
+  const res = await api.get("/companies/all", { params: role ? { role } : undefined });
+  return res.data;
+};
+
 export const fetchCategories = async (): Promise<Category[]> => {
   const res = await api.get("/categories");
   return res.data;

@@ -166,9 +166,22 @@ def get_items(
         }
         for item in items:
             item._vessel_active = overrides.get(item.id, True)
+
         if show_vessel_inactive != "true":
-            items = [i for i in items if i._vessel_active]
-            total = len(items)
+            # Re-count and re-fetch excluding vessel-inactive items
+            vessel_inactive_ids = {
+                vi.item_id
+                for vi in db.query(VesselItem).filter(
+                    VesselItem.vessel_id == vessel_id,
+                    VesselItem.is_active == False,
+                ).all()
+            }
+            if vessel_inactive_ids:
+                q = q.filter(~Item.id.in_(vessel_inactive_ids))
+                total = q.count()
+                items = q.order_by(Item.name).offset((page - 1) * page_size).limit(page_size).all()
+                for item in items:
+                    item._vessel_active = True
     else:
         for item in items:
             item._vessel_active = True

@@ -29,7 +29,7 @@ export default function Layout() {
               className="flex items-center gap-2 font-bold text-slate-800 text-base shrink-0 cursor-pointer"
             >
               <span>⚓</span>
-              <span>VesselOps</span>
+              <span>VesselReq</span>
             </Link>
 
             {isSuperAdmin && (
@@ -39,6 +39,7 @@ export default function Layout() {
                 <NavLink to="/companies" className={({ isActive }) => isActive ? activeCls : navCls}>Companies</NavLink>
                 <NavLink to="/requisitions" className={({ isActive }) => isActive ? activeCls : navCls}>Requisitions</NavLink>
                 <NavLink to="/admin/tags" className={({ isActive }) => isActive ? activeCls : navCls}>Tags</NavLink>
+                <NavLink to="/admin/bulk" className={({ isActive }) => isActive ? activeCls : navCls}>Bulk Upload</NavLink>
               </>
             )}
 

@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import companies, items, auth, requisitions, categories, vessels, users, tags
+from app.routers import companies, items, auth, requisitions, categories, vessels, users, tags, bulk
 import app.models
 
 app = FastAPI()
@@ -23,6 +23,7 @@ app.include_router(items.router)
 app.include_router(requisitions.router)
 app.include_router(categories.router)
 app.include_router(tags.router)
+app.include_router(bulk.router)
 
 app.mount("/media", StaticFiles(directory="media"), name="media")
 

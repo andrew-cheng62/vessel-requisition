@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api, { fetchCompanies, fetchCategories, fetchTags } from "../../api/api";
+import api, { fetchAllCompanies, fetchCategories, fetchTags } from "../../api/api";
 import type { Company, Category, Tag } from "../../types";
 import Button from "../../components/ui/Button";
 import Input from "../../components/ui/Input";
@@ -30,8 +30,8 @@ export default function CreateItem() {
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
-    fetchCompanies({ role: "manufacturer" }).then(res => setManufacturers(res.items));
-    fetchCompanies({ role: "supplier" }).then(res => setSuppliers(res.items));
+    fetchAllCompanies("manufacturer").then(setManufacturers);
+    fetchAllCompanies("supplier").then(setSuppliers);
     fetchCategories().then(setCategories);
     fetchTags().then(setAllTags);
   }, []);
