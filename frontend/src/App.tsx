@@ -4,8 +4,10 @@ import { Toaster } from "react-hot-toast";
 import Layout from "./Layout";
 import ProtectedLayout from "./components/ProtectedLayout";
 import RoleRoute from "./components/RoleRoute";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 import Login from "./pages/Auth/Login";
+import AdminLogin from "./pages/Auth/AdminLogin";
 import RegisterVessel from "./pages/Auth/RegisterVessel";
 
 import Items from "./pages/Items/Items";
@@ -39,6 +41,7 @@ const router = createBrowserRouter([
     children: [
       { path: "/login", element: <Login /> },
       { path: "/register", element: <RegisterVessel /> },
+      { path: "/admin/login", element: <AdminLogin /> },
 
       {
         element: <ProtectedLayout />,
@@ -88,9 +91,12 @@ const router = createBrowserRouter([
 
 export default function App() {
   return (
-    <>
-      <Toaster position="bottom-right" />
+    <ErrorBoundary>
+      <Toaster position="bottom-right" toastOptions={{
+        error: { duration: 5000 },
+        success: { duration: 3000 },
+      }} />
       <RouterProvider router={router} />
-    </>
+    </ErrorBoundary>
   );
 }

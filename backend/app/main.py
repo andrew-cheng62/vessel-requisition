@@ -3,13 +3,14 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import companies, items, auth, requisitions, categories, vessels, users, tags, bulk
+from app.core.config import settings
 import app.models
 
-app = FastAPI()
+app = FastAPI(title="VesselReq API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=[settings.ALLOWED_ORIGIN, "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -29,4 +30,4 @@ app.mount("/media", StaticFiles(directory="media"), name="media")
 
 @app.get("/")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "app": "VesselReq"}

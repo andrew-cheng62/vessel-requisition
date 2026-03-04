@@ -3,6 +3,7 @@ import { Outlet, useLocation, Link, NavLink } from "react-router-dom";
 import { useAuth } from "./context/AuthContext";
 import Button from "./components/ui/Button";
 import ChangePasswordModal from "./components/ChangePasswordModal";
+import Logo from "./components/Logo";
 
 export default function Layout() {
   const location = useLocation();
@@ -16,7 +17,7 @@ export default function Layout() {
   const activeCls = "text-sm font-medium text-sky-600 border-b-2 border-sky-600 pb-0.5 cursor-pointer";
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
 
       {/* NAVBAR */}
       <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-10">
@@ -26,10 +27,9 @@ export default function Layout() {
           <div className="flex items-center gap-6">
             <Link
               to={isSuperAdmin ? "/admin/vessels" : "/items"}
-              className="flex items-center gap-2 font-bold text-slate-800 text-base shrink-0 cursor-pointer"
+              className="flex items-center shrink-0 cursor-pointer"
             >
-              <span>⚓</span>
-              <span>VesselReq</span>
+              <Logo size={28} />
             </Link>
 
             {isSuperAdmin && (
@@ -85,7 +85,7 @@ export default function Layout() {
           <div className="max-w-7xl mx-auto px-6 h-8 flex items-center gap-2">
             {vesselName && (
               <>
-                <span className="text-slate-400 text-xs">🚢</span>
+                <span className="text-slate-400 text-xs"></span>
                 <span className="text-xs font-semibold tracking-widest uppercase text-slate-200">
                   {vesselName}
                 </span>
@@ -103,7 +103,19 @@ export default function Layout() {
         </div>
       )}
 
-      <main><Outlet /></main>
+      <main className="flex-1"><Outlet /></main>
+
+      {/* FOOTER */}
+      <footer className="border-t border-gray-200 bg-white mt-auto">
+        <div className="max-w-7xl mx-auto px-6 h-12 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Logo size={18} />
+          </div>
+          <p className="text-xs text-gray-400">
+            © {new Date().getFullYear()} VesselReq. All rights reserved.
+          </p>
+        </div>
+      </footer>
 
       {showChangePassword && (
         <ChangePasswordModal onClose={() => setShowChangePassword(false)} />

@@ -291,9 +291,7 @@ export default function Items() {
               return (
                 <tr key={item.id} className={`border-t border-gray-100 hover:bg-gray-50 ${dimmed ? "opacity-40" : ""}`}>
                   <td className="px-4 py-3">
-                    <Link to={`/items/${item.id}`} className="font-medium text-gray-900 hover:text-sky-600 hover:underline">
-                      {item.name}
-                    </Link>
+                    <div className="font-medium text-gray-900">{item.name}</div>
                     {item.desc_short && (
                       <div className="text-xs text-gray-400 truncate max-w-xs">{item.desc_short}</div>
                     )}
@@ -318,6 +316,8 @@ export default function Items() {
                     </td>
                   )}
                   <td className="px-4 py-3 text-right whitespace-nowrap">
+                    <Link to={`/items/${item.id}`}><Button variant="ghost">View</Button></Link>
+                    <Link to={`/items/${item.id}/edit`}><Button variant="ghost">Edit</Button></Link>
                     <Button variant="secondary" onClick={() => handleOrder(item)}>Order</Button>
                   </td>
                 </tr>

@@ -1,5 +1,6 @@
 import axios from "axios";
 import type { Item, Company, Category, CompanyRole, Vessel, User } from "../types";
+import toast from "react-hot-toast";
 
 const api = axios.create({ baseURL: "http://localhost:8000" });
 
@@ -8,6 +9,33 @@ api.interceptors.request.use((config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+// Track whether we've already shown the session-expired toast
+// so it doesn't fire multiple times if several requests fail at once
+let sessionExpiredShown = false;
+
+api.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401 && !sessionExpiredShown) {
+      sessionExpiredShown = true;
+      localStorage.removeItem("token");
+
+      toast.error("Your session has expired. Please sign in again.", {
+        duration: 5000,
+        id: "session-expired",
+      });
+
+      // Small delay so the toast is visible before redirect
+      setTimeout(() => {
+        sessionExpiredShown = false;
+        window.location.href = "/login";
+      }, 1500);
+    }
+
+    return Promise.reject(error);
+  }
+);
 
 export default api;
 
